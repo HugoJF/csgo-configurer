@@ -1,0 +1,4 @@
+test1
+
+"dm_headshot_only": ""
+"dm_headshot_only": "true"

@@ -1,0 +1,4 @@
+test1
+
+"dm_headshot_only": "{{ variable('dm_enabled', $dm_enabled ?? null, 'true') }}"
+"dm_headshot_only": "@variable('dm_enabled:true')"
