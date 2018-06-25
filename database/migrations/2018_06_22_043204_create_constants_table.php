@@ -6,33 +6,33 @@ use Illuminate\Database\Migrations\Migration;
 
 class CreateConstantsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
-    public function up()
-    {
-        Schema::create('constants', function (Blueprint $table) {
-            $table->increments('id');
+	/**
+	 * Run the migrations.
+	 *
+	 * @return void
+	 */
+	public function up()
+	{
+		Schema::create('constants', function (Blueprint $table) {
+			$table->increments('id');
 
-            $table->string('key');
-            $table->string('value');
+			$table->string('key');
+			$table->string('value');
 
-            $table->integer('bundle_id')->unsigned();
-            $table->foreign('bundle_id')->references('id')->on('bundles')->onDelete('cascade');
+			$table->integer('config_id')->unsigned();
+			$table->foreign('config_id')->references('id')->on('configs')->onDelete('cascade');
 
-            $table->timestamps();
-        });
-    }
+			$table->timestamps();
+		});
+	}
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
-    public function down()
-    {
-        Schema::dropIfExists('constant');
-    }
+	/**
+	 * Reverse the migrations.
+	 *
+	 * @return void
+	 */
+	public function down()
+	{
+		Schema::dropIfExists('constant');
+	}
 }

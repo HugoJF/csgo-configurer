@@ -16,45 +16,55 @@ class Server extends Model
 		return $this->belongsTo('App\Installation');
 	}
 
-	public function bundles()
+	public function configs()
 	{
-		return $this->morphMany('App\Bundle', 'owner');
+		return $this->morphMany('App\Config', 'owner');
 	}
 
-	private function getBundles()
+	public function files()
 	{
-		$bundles = [];
+		return $this->morphMany('App\File', 'owner');
+	}
 
-		$user_bundles = Auth::user()->bundles;
-		$server_bundles = $this->bundles;
+	private function getConfigs()
+	{
+		$configs = [];
+		$this->installation->load(['plugins' => function ($q) {
+			$q->orderBy('installation_plugin.priority', 'DESC');
+		}]);
 
-		foreach ($user_bundles as $b) {
-			$bundles[] = $b;
+		$user_configs = Auth::user()->configs()->orderBy('priority', 'DESC')->get();
+		$server_configs = $this->configs()->orderBy('priority', 'DESC')->get();
+
+		foreach ($user_configs as $b) {
+			$configs[] = $b;
 		}
 
-		foreach ($server_bundles as $b) {
-			$bundles[] = $b;
+		foreach ($server_configs as $b) {
+			$configs[] = $b;
 		}
 
-		foreach ($this->installation->templates as $template) {
-			if ($template->pivot->selection) {
-				$bundles[] = $template->pivot->selection;
+		if ($this->installation) {
+			foreach ($this->installation->plugins as $plugin) {
+				if ($plugin->pivot->selection) {
+					$configs[] = $plugin->pivot->selection;
+				}
 			}
 		}
 
-		return $bundles;
+		return $configs;
 	}
 
 	public function getConstants()
 	{
-		$bundles = $this->getBundles();
-		$bundle = [];
+		$configs = $this->getConfigs();
+		$config = [];
 		$constants = [];
 
-		foreach ($bundles as $bundle) {
-			foreach ($bundle->constants as $constant) {
-				if (!array_key_exists($constant->key, $bundle)) {
-					$bundle[ $constant->key ] = $constant->value;
+		foreach ($configs as $c) {
+			foreach ($c->constants as $constant) {
+				if (!array_key_exists($constant->key, $config)) {
+					$config[ $constant->key ] = $constant->value;
 					$constants[] = $constant;
 				}
 			}
@@ -62,12 +72,12 @@ class Server extends Model
 
 		return [
 			'constants' => $constants,
-			'bundle'    => $bundle,
+			'config'    => $config,
 		];
 	}
 
-	public function renderBundle()
+	public function renderConfig()
 	{
-		return $this->getConstants()['bundle'];
+		return $this->getConstants()['config'];
 	}
 }

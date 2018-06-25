@@ -1,14 +1,14 @@
 @extends('layout.app')
 
 @section('content')
-    <h1>Bundles</h1>
+    <h1>Configs</h1>
     <p>
-        <a href="{{ route('bundle.create') }}" id="generate" type="submit" name="generate" class="btn btn-default">
-            <span class="glyphicon glyphicon-plus-sign"></span> Add new bundles
+        <a href="{{ route('config.create') }}" id="generate" type="submit" name="generate" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus-sign"></span> Add new configs
         </a>
     </p>
     
-    @include('bundle.table', $bundles)
+    @include('config.table', $configs)
 @endsection
 
 @push('scripts')

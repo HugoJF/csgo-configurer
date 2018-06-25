@@ -9,15 +9,15 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($templates as $key=>$template)
+    @foreach($plugins as $key=>$plugin)
         <tr>
-            <td data-order="{{ $key }}">{{ $template->name }}</td>
-            <td>{{ $template->description }}</td>
-            <td>{{ $template->folder }}</td>
-            <td>{{ $template->modified_at->diffForHumans() }}</td>
+            <td data-order="{{ $key }}">{{ $plugin->name }}</td>
+            <td>{{ $plugin->description }}</td>
+            <td>{{ $plugin->folder }}</td>
+            <td>{{ $plugin->modified_at->diffForHumans() }}</td>
             
             <td style="white-space: nowrap;">
-                <a href="{{ route('template.show', $template) }}" class="btn btn-xs btn-success">View</a>
+                <a href="{{ route('plugin.show', $plugin) }}" class="btn btn-xs btn-success">View</a>
             </td>
         </tr>
     @endforeach

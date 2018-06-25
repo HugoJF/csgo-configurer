@@ -36,9 +36,23 @@ class ServerController extends Controller
 	{
 		$installation = $server->installation;
 
-		$files = $installation->files();
+		$installation->load(['plugins' => function ($q) {
+			$q->orderBy('installation_plugin.priority', 'ASC');
+		}]);
+
+		$files = [];
+
+		foreach ($installation->plugins as $plugin) {
+			foreach ($plugin->files as $file) {
+				$files[] = $file;
+			}
+		}
 
 		Storage::disk('renders')->makeDirectory($server->id);
+
+		foreach ($server->files as $file) {
+			$file->delete();
+		}
 
 		foreach ($files as $file) {
 			$this->render_file($server, $file);
@@ -51,16 +65,25 @@ class ServerController extends Controller
 
 	public function render_file(Server $server, File $file)
 	{
-		$destination_path = $server->id .  DIRECTORY_SEPARATOR . $this->strip_first_folder($file->path);
+		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->strip_first_folder($file->path);
 
 
 		$raw_content = Storage::disk('plugins')->get($file->path);
 
 		if ($file->renderable) {
-			$content = view(['template' => $raw_content,], $server->renderBundle())->render();
+			$content = view(['plugin' => $raw_content,], $server->renderConfig())->render();
 		} else {
 			$content = $raw_content;
 		}
+
+		$server_file = File::make();
+
+		$server_file->path = $this->strip_first_folder($file->path);
+		$server_file->renderable = true;
+
+		$server_file->owner()->associate($server);
+
+		$server_file->save();
 
 		Storage::disk('renders')->put($destination_path, $content);
 	}

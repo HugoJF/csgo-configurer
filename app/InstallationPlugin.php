@@ -6,10 +6,10 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\View;
 
-class InstallationTemplate extends Pivot
+class InstallationPlugin extends Pivot
 {
 	public function selection()
 	{
-		return $this->belongsTo('App\Bundle', 'bundle_id');
+		return $this->belongsTo('App\Config', 'config_id');
 	}
 }

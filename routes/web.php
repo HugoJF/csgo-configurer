@@ -50,7 +50,7 @@ Route::get('storage', function () {
 	app('App\Http\Controllers\FileController')->sync_folders();
 	app('App\Http\Controllers\FileController')->sync_plugins_files();
 
-	return \App\Template::with('files')->get()->toJson();
+	return \App\Plugin::with('files')->get()->toJson();
 
 });
 
@@ -62,12 +62,12 @@ Route::get('installations/{installation}/edit', 'InstallationController@edit')->
 Route::patch('installations/{installation}', 'InstallationController@update')->name('installation.update');
 Route::delete('installations/{installation}', 'InstallationController@delete')->name('installation.delete');
 
-Route::get('installations/{installation}/add-template', 'InstallationController@add_template')->name('installation.add-template');
-Route::delete('installations/{installation}/remove-template/{template}', 'InstallationController@remove_template')->name('installation.remove-template');
-Route::patch('installations/{installation}/add-template/{template}', 'InstallationController@store_template')->name('installation.store-template');
+Route::get('installations/{installation}/add-plugin', 'InstallationController@add_plugin')->name('installation.add-plugin');
+Route::delete('installations/{installation}/remove-plugin/{plugin}', 'InstallationController@remove_plugin')->name('installation.remove-plugin');
+Route::patch('installations/{installation}/add-plugin/{plugin}', 'InstallationController@store_plugin')->name('installation.store-plugin');
 
-Route::get('installations/{installation}/selection/{template}', 'InstallationController@create_selection')->name('installation.create-selection');
-Route::post('installations/{installation}/selection/{template}', 'InstallationController@store_selection')->name('installation.store-selection');
+Route::get('installations/{installation}/selection/{plugin}', 'InstallationController@create_selection')->name('installation.create-selection');
+Route::post('installations/{installation}/selection/{plugin}', 'InstallationController@store_selection')->name('installation.store-selection');
 
 Route::get('servers', 'ServerController@index')->name('server.index');
 Route::get('servers/create', 'ServerController@create')->name('server.create');
@@ -77,29 +77,30 @@ Route::patch('servers/{server}', 'ServerController@update')->name('server.update
 Route::get('servers/{server}', 'ServerController@show')->name('server.show');
 Route::post('servers', 'ServerController@store')->name('server.store');
 
-Route::get('bundles/{bundle}/constant/create', 'ConstantController@create')->name('constant.create');
-Route::post('bundles/{bundle}/constant', 'ConstantController@store')->name('constant.store');
+Route::get('configs/{config}/constant/create', 'ConstantController@create')->name('constant.create');
+Route::post('configs/{config}/constant', 'ConstantController@store')->name('constant.store');
 
-Route::get('bundles/create/{type?}/{id?}', 'BundleController@create')->name('bundle.create');
-Route::get('bundles/{bundle}', 'BundleController@show')->name('bundle.show');
-Route::get('bundles', 'BundleController@index')->name('bundle.index');
-Route::get('bundles/{bundle}/edit', 'BundleController@edit')->name('bundle.edit');
-Route::patch('bundles/{bundle}', 'BundleController@update')->name('bundle.update');
-Route::delete('bundles/{bundle}', 'BundleController@delete')->name('bundle.delete');
-Route::post('bundles/{type?}/{id?}', 'BundleController@store')->name('bundle.store');
+Route::get('configs/create/{type?}/{id?}', 'ConfigController@create')->name('config.create');
+Route::get('configs/{config}', 'ConfigController@show')->name('config.show');
+Route::get('configs', 'ConfigController@index')->name('config.index');
+Route::get('configs/{config}/edit', 'ConfigController@edit')->name('config.edit');
+Route::patch('configs/{config}', 'ConfigController@update')->name('config.update');
+Route::delete('configs/{config}', 'ConfigController@delete')->name('config.delete');
+Route::post('configs/{type?}/{id?}', 'ConfigController@store')->name('config.store');
 
 
-Route::get('templates/{template}/files', 'FileController@index')->name('file.index');
-Route::get('templates/{template}/files/{file}', 'FileController@show')->name('file.show');
+Route::get('plugins/{plugin}/files', 'FileController@index')->name('file.index');
+Route::get('plugins/{plugin}/files/{file}', 'FileController@show_plugin_file')->name('file.show');
+Route::get('servers/{server}/files/{file}', 'FileController@show_server_file')->name('file.show');
 
 Route::get('files/{file}/edit', 'FileController@edit')->name('file.edit');
 Route::patch('/files/{file}', 'FileController@update')->name('file.update');
 
-Route::get('templates/create', 'TemplateController@create')->name('template.create');
-Route::get('templates/{template}', 'TemplateController@show')->name('template.show');
-Route::get('templates', 'TemplateController@index')->name('template.index');
-Route::post('templates', 'TemplateController@store')->name('template.store');
+Route::get('plugins/create', 'PluginController@create')->name('plugin.create');
+Route::get('plugins/{plugin}', 'PluginController@show')->name('plugin.show');
+Route::get('plugins', 'PluginController@index')->name('plugin.index');
+Route::post('plugins', 'PluginController@store')->name('plugin.store');
 
 
-Route::get('/home', function() { return 'TODO'; })->name('home');
+Route::get('/home', function() { return redirect('/'); })->name('home');
 Route::get('/user/settings', function() { return 'TODO'; })->name('users.settings');

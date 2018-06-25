@@ -14,8 +14,8 @@ class Constant extends Model
 		'user_id',
 	];
 
-	public function bundle()
+	public function config()
 	{
-		return $this->belongsTo('App\Bundle');
+		return $this->belongsTo('App\Config');
 	}
 }

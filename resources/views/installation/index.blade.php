@@ -21,7 +21,7 @@
         <tbody>
         @foreach($installations as $key => $installation)
             <tr>
-                <td data-order="{{ $key }}">{{ $installation->name }}</td>
+                <td data-order="{{ $key }}"><a href="{{ route('installation.show', $installation) }}">{{ $installation->name }}</a></td>
                 
                 <td>{{ $installation->description }}</td>
                 <td>{{ $installation->updated_at->diffForHumans() }}</td>

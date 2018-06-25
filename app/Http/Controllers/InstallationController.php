@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Bundle;
+use App\Config;
 use App\Installation;
 use App\Selection;
-use App\Template;
+use App\Plugin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
 use Kris\LaravelFormBuilder\FormBuilder;
@@ -21,60 +21,65 @@ class InstallationController extends Controller
 		]);
 	}
 
-	public function add_template(Installation $installation)
+	public function add_plugin(Installation $installation)
 	{
-		$templates = Template::all();
+		$plugins = Plugin::all();
 
-		return view('installation.add_template', [
+		return view('installation.add_plugin', [
 			'installation' => $installation,
-			'templates'    => $templates,
+			'plugins'      => $plugins,
 		]);
 	}
 
-	public function store_template(Installation $installation, Template $template)
+	public function store_plugin(Installation $installation, Plugin $plugin)
 	{
-		$installation->templates()->attach($template);
+		$installation->plugins()->attach($plugin);
 
 		return redirect()->route('installation.show', [
 			'installation' => $installation,
 		]);
 	}
 
-	public function remove_template(Installation $installation, Template $template)
+	public function remove_plugin(Installation $installation, Plugin $plugin)
 	{
-		$installation->templates()->detach($template);
+		$installation->plugins()->detach($plugin);
 
 		return redirect()->back();
 	}
 
-	public function create_selection(FormBuilder $formBuilder, Installation $installation, Template $template)
+	public function create_selection(FormBuilder $formBuilder, Installation $installation, Plugin $plugin)
 	{
-		$bundles = $template->bundles;
+		$configs = $plugin->configs;
+
+		$selection = $installation->plugins()->where('plugin_id', $plugin->id)->first()->pivot;
 
 		$form = $formBuilder->create('App\Forms\SelectionForm', [
 			'method' => 'POST',
-			'url'    => route('installation.store-selection', [$installation, $template]),
+			'url'    => route('installation.store-selection', [$installation, $plugin]),
+			'model' => $selection,
 		], [
 			'installations'         => [$installation],
 			'installation_selected' => $installation->id,
-			'templates'             => [$template],
-			'template_selected'     => $template->id,
-			'bundles'               => $bundles,
+			'plugins'               => [$plugin],
+			'plugin_selected'       => $plugin->id,
+			'configs'               => $configs,
 		]);
 
 		return view('generics.form', [
-			'title'       => 'Template bundle selection form',
+			'title'       => 'Plugin config selection form',
 			'form'        => $form,
-			'bundles'     => $bundles,
-			'submit_text' => 'Make bundle selection',
+			'configs'     => $configs,
+			'submit_text' => 'Make config selection',
 		]);
 	}
 
-	public function store_selection(Request $request, Installation $installation, Template $template)
+	public function store_selection(Request $request, Installation $installation, Plugin $plugin)
 	{
-		$pivot = $installation->templates()->where('template_id', $template->id)->get()->first()->pivot;
+		$pivot = $installation->plugins()->where('plugin_id', $plugin->id)->first()->pivot;
 
-		$pivot->selection()->associate(Bundle::find($request->input('bundle_id')));
+		$pivot->selection()->associate(Config::find($request->input('config_id')));
+
+		$pivot->priority = $request->input('priority');
 
 		$pivot->save();
 

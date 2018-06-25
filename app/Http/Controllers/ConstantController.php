@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Bundle;
+use App\Config;
 use App\Constant;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -10,11 +10,11 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class ConstantController extends Controller
 {
-	public function create(Bundle $bundle, FormBuilder $formBuilder)
+	public function create(Config $config, FormBuilder $formBuilder)
 	{
 		$form = $formBuilder->create('App\Forms\ConstantForm', [
 			'method' => 'POST',
-			'url'    => route('constant.store', $bundle),
+			'url'    => route('constant.store', $config),
 		]);
 
 		return view('generics.form', [
@@ -24,16 +24,16 @@ class ConstantController extends Controller
 		]);
 	}
 
-	public function store(Bundle $bundle)
+	public function store(Config $config)
 	{
 		$const = Constant::make();
 
 		$const->fill(Input::all());
 
-		$const->bundle()->associate($bundle);
+		$const->config()->associate($config);
 
 		$const->save();
 
-		return redirect()->route('bundle.show', $bundle);
+		return redirect()->route('config.show', $config);
 	}
 }

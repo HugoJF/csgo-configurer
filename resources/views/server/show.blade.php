@@ -25,14 +25,17 @@
     </p>
     @include('server.table', ['servers' => [$server]])
     
-    <h2>Server bundles</h2>
+    <h2>Server configs</h2>
     <p>
-        <a href="{{ route('bundle.create', ['server', $server]) }}" id="generate" type="submit" name="generate" class="btn btn-default">
-            <span class="glyphicon glyphicon-plus-sign"></span> Create bundle for this server
+        <a href="{{ route('config.create', ['server', $server]) }}" id="generate" type="submit" name="generate" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus-sign"></span> Create config for this server
         </a>
     </p>
-    @include('bundle.table', ['bundles' => $server->bundles])
+    @include('config.table', ['configs' => $server->configs])
     
     <h2>Server variables</h2>
     @include('constant.table', ['constants' => $server->getConstants()['constants']])
+    
+    <h2>Server rendered files</h2>
+    @include('file.table', ['files' => $server->files])
 @endsection

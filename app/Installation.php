@@ -15,9 +15,9 @@ class Installation extends Model
 		return $this->hasOne('App\Server');
 	}
 
-	public function templates()
+	public function plugins()
 	{
-		return $this->belongsToMany('App\Template')->withPivot('bundle_id')->using('App\InstallationTemplate');
+		return $this->belongsToMany('App\Plugin')->withPivot(['config_id', 'priority'])->using('App\InstallationPlugin');
 	}
 
 	public function selections()
@@ -25,16 +25,4 @@ class Installation extends Model
 		return $this->hasMany('App\Selection');
 	}
 
-	public function files()
-	{
-		$files = [];
-
-		foreach ($this->templates as $template) {
-			foreach ($template->files as $file) {
-				array_push($files, $file);
-			}
-		}
-
-		return $files;
-	}
 }

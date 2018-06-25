@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\File;
 use App\Server;
-use App\Template;
+use App\Plugin;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -12,12 +12,23 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class FileController extends Controller
 {
-	public function index(Template $template)
+	public function index(Plugin $plugin)
 	{
 
 	}
 
-	public function show(Template $template, File $file)
+	public function show_server_file(Server $server, File $file)
+	{
+		$content = null;
+
+		if ($file->renderable) {
+			$content = Storage::disk('renders')->get($server->id . DIRECTORY_SEPARATOR . $file->path);
+		}
+
+		return $this->show($file, $content);
+	}
+
+	public function show_plugin_file(Plugin $plugin, File $file)
 	{
 		$content = null;
 
@@ -25,6 +36,11 @@ class FileController extends Controller
 			$content = Storage::disk('plugins')->get($file->path);
 		}
 
+		return $this->show($file, $content);
+	}
+
+	private function show(File $file, $content)
+	{
 		return view('file.show', [
 			'file'    => $file,
 			'content' => $content,
@@ -57,31 +73,31 @@ class FileController extends Controller
 
 	public function sync_folders()
 	{
-		$templates = Template::all();
+		$plugins = Plugin::all();
 
-		$plugin_list = Storage::disk('plugins')->directories();
+		$dir_plugin_list = Storage::disk('plugins')->directories();
 
-		$templates_list = $templates->pluck('folder');
+		$db_plugin_list = $plugins->pluck('folder');
 
-		foreach ($plugin_list as $plugin) {
-			if (!in_array($plugin, $templates_list->toArray())) {
-				$template = Template::make();
+		foreach ($dir_plugin_list as $p) {
+			if (!in_array($p, $db_plugin_list->toArray())) {
+				$plugin = Plugin::make();
 
-				$template->slug = str_slug($plugin);
-				$template->name = $plugin;
-				$template->description = 'No description yet';
+				$plugin->slug = str_slug($p);
+				$plugin->name = $p;
+				$plugin->description = 'No description yet';
 
-				$template->folder = $plugin;
+				$plugin->folder = $p;
 
-				$template->modified_at = Carbon::now();
+				$plugin->modified_at = Carbon::now();
 
-				$template->save();
+				$plugin->save();
 			}
 		}
 
-		foreach ($templates_list as $temp) {
-			if (!in_array($temp, $plugin_list)) {
-				// $t = Template::where('folder', $temp)->first()->delete();
+		foreach ($db_plugin_list as $temp) {
+			if (!in_array($temp, $dir_plugin_list)) {
+				// $t = Plugin::where('folder', $temp)->first()->delete();
 				Storage::disk('plugins')->makeDirectory($temp);
 			}
 		}
@@ -91,12 +107,12 @@ class FileController extends Controller
 	{
 		$plugin_list = Storage::disk('plugins')->directories();
 
-		foreach ($plugin_list as $plugin) {
-			$plugin_files = Storage::disk('plugins')->allFiles($plugin);
+		foreach ($plugin_list as $p) {
+			$plugin_files = Storage::disk('plugins')->allFiles($p);
 
-			$template = Template::where('folder', $plugin)->first();
+			$plugin = Plugin::where('folder', $p)->first();
 
-			$current_files = $template->files()->withTrashed()->get();
+			$current_files = $plugin->files()->withTrashed()->get();
 
 			$current_files_list = $current_files->pluck('path');
 
@@ -106,11 +122,11 @@ class FileController extends Controller
 
 					$f->path = $file;
 					$f->renderable = false;
-					$f->owner()->associate($template);
+					$f->owner()->associate($plugin);
 
 					$f->save();
 				} else {
-					$f = $template->files()->withTrashed()->where('path', $file)->first();
+					$f = $plugin->files()->withTrashed()->where('path', $file)->first();
 					if ($f && $f->trashed()) {
 						$f->restore();
 					}
@@ -119,7 +135,7 @@ class FileController extends Controller
 
 			foreach ($current_files_list as $c) {
 				if (!in_array($c, $plugin_files)) {
-					$f = $template->files()->where('path', $c)->first()->delete();
+					$f = $plugin->files()->where('path', $c)->first()->delete();
 				}
 			}
 		}

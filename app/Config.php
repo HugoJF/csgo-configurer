@@ -4,7 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Bundle extends Model
+class Config extends Model
 {
 
 	protected $guarded = [
@@ -14,6 +14,7 @@ class Bundle extends Model
 	protected $fillable = [
 		'name',
 		'slug',
+		'priority',
 	];
 
 	public function getRouteKeyName()
@@ -33,6 +34,6 @@ class Bundle extends Model
 
 	public function selections()
 	{
-		return $this->hasMany('App\InstallationBundle', 'bundle_id');
+		return $this->hasMany('App\InstallationConfig', 'config_id');
 	}
 }

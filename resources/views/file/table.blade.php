@@ -9,7 +9,7 @@
     </tr>
     </thead>
     <tbody>
-    @foreach($files as $key => $file)
+    @forelse($files as $key => $file)
         <tr>
             <td data-order="{{ $key }}">{{ $file->path }}</td>
             <td>
@@ -23,7 +23,11 @@
                 <a href="{{ route('file.edit', $file) }}" class="btn btn-xs btn-primary">Edit</a>
             </td>
         </tr>
-    @endforeach
+    @empty
+        <tr>
+            <td align="center" colspan="5"><strong>No files</strong></td>
+        </tr>
+    @endforelse
     
     </tbody>
 </table>

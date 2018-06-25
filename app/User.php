@@ -31,8 +31,8 @@ class User extends Authenticatable
 		'remember_token',
 	];
 
-	public function bundles()
+	public function configs()
 	{
-		return $this->morphMany('App\Bundle', 'owner');
+		return $this->morphMany('App\Config', 'owner');
 	}
 }

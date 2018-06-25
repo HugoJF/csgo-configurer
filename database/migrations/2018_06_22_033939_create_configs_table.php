@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateBundlesTable extends Migration
+class CreateConfigsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,12 @@ class CreateBundlesTable extends Migration
      */
     public function up()
     {
-        Schema::create('bundles', function (Blueprint $table) {
+        Schema::create('configs', function (Blueprint $table) {
 			$table->increments('id');
 
 			$table->string('name');
+
+			$table->integer('priority')->nullable();
 
 			$table->string('slug')->unique();
 
@@ -34,7 +36,7 @@ class CreateBundlesTable extends Migration
      */
     public function down()
     {
-        Schema::table('bundles', function (Blueprint $table) {
+        Schema::table('configs', function (Blueprint $table) {
             //
         });
     }

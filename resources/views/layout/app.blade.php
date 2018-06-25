@@ -17,7 +17,7 @@
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="{{ asset('/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     
-    <!-- Custom styles for this template -->
+    <!-- Custom styles for this plugin -->
     <link href="{{ asset('/css/dashboard.css') }}" rel="stylesheet">
     
     <link href="{{ asset('/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
@@ -108,13 +108,13 @@
                     </div>
                     <div id="collapseZero" class="panel-collapse collapse in">
                         <ul class="list-group">
-                            <li class="list-group-item {{ Route::is('bundle.create') ? 'active' : ''}}">
+                            <li class="list-group-item {{ Route::is('config.create') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('bundle.create') }}">New Bundle</a>
+                                <a id="home" href="{{ route('config.create') }}">New Config</a>
                             </li>
-                            <li class="list-group-item {{ Route::is('template.create') ? 'active' : ''}}">
+                            <li class="list-group-item {{ Route::is('plugin.create') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('template.create') }}">New Template</a>
+                                <a id="home" href="{{ route('plugin.create') }}">New Plugin</a>
                             </li>
                             <li class="list-group-item {{ Route::is('server.create') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
@@ -139,13 +139,13 @@
                     </div>
                     <div id="collapseOne" class="panel-collapse collapse in">
                         <ul class="list-group">
-                            <li class="list-group-item {{ Route::is('bundle.index') ? 'active' : ''}}">
+                            <li class="list-group-item {{ Route::is('config.index') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('bundle.index') }}">Bundles</a>
+                                <a id="home" href="{{ route('config.index') }}">Configs</a>
                             </li>
-                            <li class="list-group-item {{ Route::is('template.index') ? 'active' : ''}}">
+                            <li class="list-group-item {{ Route::is('plugin.index') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('template.index') }}">Templates</a>
+                                <a id="home" href="{{ route('plugin.index') }}">Plugins</a>
                             </li>
                             <li class="list-group-item {{ Route::is('server.index') ? 'active' : ''}}">
                                 <span class="glyphicon glyphicon-home"></span>
