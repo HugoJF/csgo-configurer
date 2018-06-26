@@ -64,8 +64,8 @@ class FileController extends Controller
 
 	public function update(Request $request, File $file)
 	{
-
 		$file->fill($request->all() + ['renderable' => 0]);
+
 		$file->save();
 
 		return redirect()->route('file.show', [$file->owner->slug, $file]);
@@ -80,26 +80,25 @@ class FileController extends Controller
 		$db_plugin_list = $plugins->pluck('folder');
 
 		foreach ($dir_plugin_list as $p) {
-			if (!in_array($p, $db_plugin_list->toArray())) {
-				$plugin = Plugin::make();
+			if (in_array($p, $db_plugin_list->toArray())) continue;
 
-				$plugin->slug = str_slug($p);
-				$plugin->name = $p;
-				$plugin->description = 'No description yet';
+			$plugin = Plugin::make();
 
-				$plugin->folder = $p;
+			$plugin->slug = str_slug($p);
+			$plugin->name = $p;
+			$plugin->description = 'No description yet';
 
-				$plugin->modified_at = Carbon::now();
+			$plugin->folder = $p;
 
-				$plugin->save();
-			}
+			$plugin->modified_at = Carbon::now();
+
+			$plugin->save();
 		}
 
 		foreach ($db_plugin_list as $temp) {
-			if (!in_array($temp, $dir_plugin_list)) {
-				// $t = Plugin::where('folder', $temp)->first()->delete();
-				Storage::disk('plugins')->makeDirectory($temp);
-			}
+			if (in_array($temp, $dir_plugin_list)) continue;
+
+			Storage::disk('plugins')->makeDirectory($temp);
 		}
 	}
 

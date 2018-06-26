@@ -29,6 +29,7 @@ class Server extends Model
 	private function getConfigs()
 	{
 		$configs = [];
+		
 		$this->installation->load(['plugins' => function ($q) {
 			$q->orderBy('installation_plugin.priority', 'DESC');
 		}]);

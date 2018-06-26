@@ -32,6 +32,18 @@ class ServerController extends Controller
 		return $path;
 	}
 
+	private function prepareDirection($directory)
+	{
+		Storage::disk('renders')->makeDirectory($directory);
+	}
+
+	private function eraseServerFiles(Server $server)
+	{
+		foreach ($server->files as $file) {
+			$file->delete();
+		}
+	}
+
 	public function render(Server $server)
 	{
 		$installation = $server->installation;
@@ -48,11 +60,9 @@ class ServerController extends Controller
 			}
 		}
 
-		Storage::disk('renders')->makeDirectory($server->id);
+		$this->prepareDirection($server->id);
 
-		foreach ($server->files as $file) {
-			$file->delete();
-		}
+		$this->eraseServerFiles($server);
 
 		foreach ($files as $file) {
 			$this->render_file($server, $file);
@@ -63,18 +73,8 @@ class ServerController extends Controller
 		return redirect()->back();
 	}
 
-	public function render_file(Server $server, File $file)
+	private function attach_rendered_file(Server $server, $path)
 	{
-		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->strip_first_folder($file->path);
-
-
-		$raw_content = Storage::disk('plugins')->get($file->path);
-
-		if ($file->renderable) {
-			$content = view(['plugin' => $raw_content,], $server->renderConfig())->render();
-		} else {
-			$content = $raw_content;
-		}
 
 		$server_file = File::make();
 
@@ -84,6 +84,21 @@ class ServerController extends Controller
 		$server_file->owner()->associate($server);
 
 		$server_file->save();
+	}
+
+	public function render_file(Server $server, File $file)
+	{
+		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->strip_first_folder($file->path);
+
+		$raw_content = Storage::disk('plugins')->get($file->path);
+
+		if ($file->renderable) {
+			$content = view(['plugin' => $raw_content,], $server->renderConfig())->render();
+		} else {
+			$content = $raw_content;
+		}
+
+		$this->attach_rendered_file($server);
 
 		Storage::disk('renders')->put($destination_path, $content);
 	}

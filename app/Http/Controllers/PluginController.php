@@ -32,11 +32,11 @@ class PluginController extends Controller
 		]);
 	}
 
-	public function store()
+	public function store(Request $request)
 	{
 		$plugin = Plugin::make();
 
-		$plugin->fill(Input::all());
+		$plugin->fill($request->all());
 
 		$plugin->save();
 
