@@ -19,7 +19,11 @@
             <td>{{ $file->created_at->diffForHumans() }}</td>
             
             <td style="white-space: nowrap;">
-                <a href="{{ route('file.show', [$file->owner, $file]) }}" class="btn btn-xs btn-success">View</a>
+                @if($file->owner_type == 'App\Server')
+                    <a href="{{ route('file.server_show', [$file->owner_id, $file]) }}" class="btn btn-xs btn-success">View</a>
+                @else
+                    <a href="{{ route('file.show', [$file->owner_id, $file]) }}" class="btn btn-xs btn-success">View</a>
+                @endif
                 <a href="{{ route('file.edit', $file) }}" class="btn btn-xs btn-primary">Edit</a>
             </td>
         </tr>

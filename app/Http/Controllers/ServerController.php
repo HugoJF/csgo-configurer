@@ -3,10 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Classes\VariableHandler;
+use App\Events\ServerRenderRequest;
+use App\Events\ServerSynchronizationRequest;
 use App\File;
 use App\Installation;
 use App\Server;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
@@ -16,92 +19,31 @@ class ServerController extends Controller
 {
 	public function index()
 	{
-		$servers = Server::all();
+		$servers = Auth::user()->servers;
 
 		return view('server.index', [
 			'servers' => $servers,
 		]);
 	}
 
-	public function strip_first_folder($path)
+	public function sync(Server $server)
 	{
-		$split_path = explode(DIRECTORY_SEPARATOR, $path);
-		unset($split_path[0]);
-		$path = implode('/', $split_path);
+		event(new ServerSynchronizationRequest(Auth::user(), $server));
 
-		return $path;
-	}
-
-	private function prepareDirection($directory)
-	{
-		Storage::disk('renders')->makeDirectory($directory);
-	}
-
-	private function eraseServerFiles(Server $server)
-	{
-		foreach ($server->files as $file) {
-			$file->delete();
-		}
-	}
-
-	public function render(Server $server)
-	{
-		$installation = $server->installation;
-
-		$installation->load(['plugins' => function ($q) {
-			$q->orderBy('installation_plugin.priority', 'ASC');
-		}]);
-
-		$files = [];
-
-		foreach ($installation->plugins as $plugin) {
-			foreach ($plugin->files as $file) {
-				$files[] = $file;
-			}
-		}
-
-		$this->prepareDirection($server->id);
-
-		$this->eraseServerFiles($server);
-
-		foreach ($files as $file) {
-			$this->render_file($server, $file);
-		}
-
-		flash()->success("Server {$server->name} rendered successfully!");
+		flash()->success('Server Synchronization requested!');
 
 		return redirect()->back();
 	}
 
-	private function attach_rendered_file(Server $server, $path)
+	public function render(Server $server)
 	{
+		event(new ServerRenderRequest(Auth::user(), $server));
 
-		$server_file = File::make();
+		flash()->success('Server Rendering requested!');
 
-		$server_file->path = $this->strip_first_folder($file->path);
-		$server_file->renderable = true;
-
-		$server_file->owner()->associate($server);
-
-		$server_file->save();
+		return redirect()->back();
 	}
 
-	public function render_file(Server $server, File $file)
-	{
-		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->strip_first_folder($file->path);
-
-		$raw_content = Storage::disk('plugins')->get($file->path);
-
-		if ($file->renderable) {
-			$content = view(['plugin' => $raw_content,], $server->renderConfig())->render();
-		} else {
-			$content = $raw_content;
-		}
-
-		$this->attach_rendered_file($server);
-
-		Storage::disk('renders')->put($destination_path, $content);
-	}
 
 	public function show(Server $server)
 	{
@@ -159,6 +101,8 @@ class ServerController extends Controller
 		$server->fill($request->all());
 
 		$server->installation()->associate(Installation::find($request->input('installation_id')));
+
+		$server->user()->associate(Auth::user());
 
 		$server->save();
 

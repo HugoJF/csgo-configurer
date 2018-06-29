@@ -1,106 +1,99 @@
 <?php
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register web routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| contains the "web" middleware group. Now create something great!
-|
-*/
-
-Route::get('/', function () {
-    return view('welcome');
-});
-
-
 /**
  * Authentication.
  */
 Route::get('login', 'AuthController@login')->name('login');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout');
 
-
-Route::get('builder', function () {
-	$cfg =  View::make('config_example')->render();
-	preg_match_all('/\$\$([a-zA-Z0-9_-]*)\$\$/', $cfg, $matches);
-
-	// list of keys
-	// dd($matches[1]);
-
-	$b1 = [
-		'hostname' => 'first name',
-		'players' => 15,
-	];
-
-	$b2 = [
-		'hostname' => 'second name',
-		'los' => 'true',
-	];
-
-	dd($b1 + $b2);
-
-
+Route::get('/', function () {
+	return view('welcome');
 });
 
-Route::get('storage', function () {
+Route::get('/home', function () {
+	return redirect('/');
+})->name('home');
 
-	app('App\Http\Controllers\FileController')->sync_folders();
-	app('App\Http\Controllers\FileController')->sync_plugins_files();
+Route::get('sync', function (){
+	event(new \App\Events\PluginsSynchronizationRequest());
 
-	return \App\Plugin::with('files')->get()->toJson();
-
+	return 'requested!';
 });
 
-Route::get('installations', 'InstallationController@index')->name('installation.index');
-Route::get('installations/create', 'InstallationController@create')->name('installation.create');
-Route::get('installations/{installation}', 'InstallationController@show')->name('installation.show');
-Route::post('installations', 'InstallationController@store')->name('installation.store');
-Route::get('installations/{installation}/edit', 'InstallationController@edit')->name('installation.edit');
-Route::patch('installations/{installation}', 'InstallationController@update')->name('installation.update');
-Route::delete('installations/{installation}', 'InstallationController@delete')->name('installation.delete');
 
-Route::get('installations/{installation}/add-plugin', 'InstallationController@add_plugin')->name('installation.add-plugin');
-Route::delete('installations/{installation}/remove-plugin/{plugin}', 'InstallationController@remove_plugin')->name('installation.remove-plugin');
-Route::patch('installations/{installation}/add-plugin/{plugin}', 'InstallationController@store_plugin')->name('installation.store-plugin');
+Route::middleware(['logged'])->group(function () {
 
-Route::get('installations/{installation}/selection/{plugin}', 'InstallationController@create_selection')->name('installation.create-selection');
-Route::post('installations/{installation}/selection/{plugin}', 'InstallationController@store_selection')->name('installation.store-selection');
+	Route::get('/user/settings', function () {
+		return 'TODO';
+	})->name('users.settings');
 
-Route::get('servers', 'ServerController@index')->name('server.index');
-Route::get('servers/create', 'ServerController@create')->name('server.create');
-Route::get('servers/{server}/edit', 'ServerController@edit')->name('server.edit');
-Route::get('servers/{server}/render', 'ServerController@render')->name('server.render');
-Route::patch('servers/{server}', 'ServerController@update')->name('server.update');
-Route::get('servers/{server}', 'ServerController@show')->name('server.show');
-Route::post('servers', 'ServerController@store')->name('server.store');
+	Route::prefix('installations')->name('installation.')->group(function () {
+		Route::get('/', 'InstallationController@index')->name('index');
+		Route::get('create', 'InstallationController@create')->name('create');
+		Route::get('{installation}', 'InstallationController@show')->name('show');
+		Route::get('{installation}/selection/{plugin}', 'InstallationController@create_selection')->name('create-selection');
+		Route::get('{installation}/edit', 'InstallationController@edit')->name('edit');
+		Route::get('{installation}/add-plugin', 'InstallationController@add_plugin')->name('add-plugin');
 
-Route::get('configs/{config}/constant/create', 'ConstantController@create')->name('constant.create');
-Route::post('configs/{config}/constant', 'ConstantController@store')->name('constant.store');
+		Route::post('{installation}/selection/{plugin}', 'InstallationController@store_selection')->name('store-selection');
+		Route::post('/', 'InstallationController@store')->name('store');
 
-Route::get('configs/create/{type?}/{id?}', 'ConfigController@create')->name('config.create');
-Route::get('configs/{config}', 'ConfigController@show')->name('config.show');
-Route::get('configs', 'ConfigController@index')->name('config.index');
-Route::get('configs/{config}/edit', 'ConfigController@edit')->name('config.edit');
-Route::patch('configs/{config}', 'ConfigController@update')->name('config.update');
-Route::delete('configs/{config}', 'ConfigController@delete')->name('config.delete');
-Route::post('configs/{type?}/{id?}', 'ConfigController@store')->name('config.store');
+		Route::patch('{installation}', 'InstallationController@update')->name('update');
+		Route::patch('{installation}/add-plugin/{plugin}', 'InstallationController@store_plugin')->name('store-plugin');
 
+		Route::delete('{installation}', 'InstallationController@delete')->name('delete');
+		Route::delete('{installation}/remove-plugin/{plugin}', 'InstallationController@remove_plugin')->name('remove-plugin');
+	});
 
-Route::get('plugins/{plugin}/files', 'FileController@index')->name('file.index');
-Route::get('plugins/{plugin}/files/{file}', 'FileController@show_plugin_file')->name('file.show');
-Route::get('servers/{server}/files/{file}', 'FileController@show_server_file')->name('file.show');
+	Route::prefix('servers')->name('server.')->group(function () {
+		Route::get('/', 'ServerController@index')->name('index');
+		Route::get('create', 'ServerController@create')->name('create');
+		Route::get('{server}/edit', 'ServerController@edit')->name('edit');
+		Route::get('{server}/render', 'ServerController@render')->name('render');
+		Route::get('{server}/sync', 'ServerController@sync')->name('sync');
+		Route::get('{server}', 'ServerController@show')->name('show');
 
-Route::get('files/{file}/edit', 'FileController@edit')->name('file.edit');
-Route::patch('/files/{file}', 'FileController@update')->name('file.update');
+		Route::post('/', 'ServerController@store')->name('store');
 
-Route::get('plugins/create', 'PluginController@create')->name('plugin.create');
-Route::get('plugins/{plugin}', 'PluginController@show')->name('plugin.show');
-Route::get('plugins', 'PluginController@index')->name('plugin.index');
-Route::post('plugins', 'PluginController@store')->name('plugin.store');
+		Route::patch('{server}', 'ServerController@update')->name('update');
+	});
 
+	Route::prefix('contant')->name('constant.')->group(function () {
+		Route::get('{config}/constant/create', 'ConstantController@create')->name('create');
 
-Route::get('/home', function() { return redirect('/'); })->name('home');
-Route::get('/user/settings', function() { return 'TODO'; })->name('users.settings');
+		Route::post('{config}/constant', 'ConstantController@store')->name('store');
+	});
+
+	Route::prefix('config')->name('config.')->group(function () {
+		Route::get('create/{type?}/{id?}', 'ConfigController@create')->name('create');
+		Route::get('{config}', 'ConfigController@show')->name('show');
+		Route::get('/', 'ConfigController@index')->name('index');
+		Route::get('{config}/edit', 'ConfigController@edit')->name('edit');
+
+		Route::post('{type?}/{id?}', 'ConfigController@store')->name('store');
+
+		Route::patch('{config}', 'ConfigController@update')->name('update');
+
+		Route::delete('{config}', 'ConfigController@delete')->name('delete');
+	});
+
+	Route::prefix('files')->name('file.')->group(function () {
+		Route::get('{file}/edit', 'FileController@edit')->name('edit');
+
+		Route::patch('{file}', 'FileController@update')->name('update');
+	});
+
+	Route::prefix('plugins')->name('plugin.')->group(function () {
+		Route::get('create', 'PluginController@create')->name('create');
+		Route::get('{plugin}', 'PluginController@show')->name('show');
+		Route::get('/', 'PluginController@index')->name('index');
+
+		Route::post('/', 'PluginController@store')->name('store');
+	});
+
+	Route::name('file.')->group(function () {
+		Route::get('plugins/{plugin}/files', 'FileController@index')->name('index');
+		Route::get('plugins/{plugin}/files/{file}', 'FileController@show_plugin_file')->name('show');
+		Route::get('servers/{server}/files/{file}', 'FileController@show_server_file')->name('server_show');
+	});
+});

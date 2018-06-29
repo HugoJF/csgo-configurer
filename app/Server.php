@@ -11,6 +11,10 @@ class Server extends Model
 		'name', 'ip', 'port', 'password', 'ftp_user', 'ftp_password', 'ftp_host', 'ftp_root',
 	];
 
+	protected $dates = [
+		'render_requested_at', 'rendered_at', 'sync_requested_at', 'synced_at',
+	];
+
 	public function installation()
 	{
 		return $this->belongsTo('App\Installation');
@@ -26,15 +30,26 @@ class Server extends Model
 		return $this->morphMany('App\File', 'owner');
 	}
 
+	public function user()
+	{
+		return $this->belongsTo('App\User');
+	}
+
 	private function getConfigs()
 	{
+		$user = $this->user;
+
 		$configs = [];
-		
+
+		if(!$this->installation) {
+			return [];
+		}
+
 		$this->installation->load(['plugins' => function ($q) {
 			$q->orderBy('installation_plugin.priority', 'DESC');
 		}]);
 
-		$user_configs = Auth::user()->configs()->orderBy('priority', 'DESC')->get();
+		$user_configs = $user->configs()->orderBy('priority', 'DESC')->get();
 		$server_configs = $this->configs()->orderBy('priority', 'DESC')->get();
 
 		foreach ($user_configs as $b) {

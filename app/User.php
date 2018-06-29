@@ -35,4 +35,9 @@ class User extends Authenticatable
 	{
 		return $this->morphMany('App\Config', 'owner');
 	}
+
+	public function servers()
+	{
+		return $this->hasMany('App\Server');
+	}
 }

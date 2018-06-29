@@ -13,5 +13,6 @@ return [
 	'last-update'         => 'Last Update',
 	'last-sync'           => 'Last Sync',
 	'actions'             => 'Actions',
+	'never'               => 'Never',
 
 ];

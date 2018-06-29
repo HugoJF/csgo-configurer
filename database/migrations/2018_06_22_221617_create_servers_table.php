@@ -26,6 +26,13 @@ class CreateServersTable extends Migration
 			$table->string('ftp_password');
 			$table->string('ftp_root');
 
+			$table->integer('user_id')->unsigned();
+			$table->foreign('user_id')->references('id')->on('users');
+
+			$table->dateTime('render_requested_at')->nullable();
+			$table->dateTime('rendered_at')->nullable();
+
+			$table->dateTime('sync_requested_at')->nullable();
 			$table->dateTime('synced_at')->nullable();
 
             $table->timestamps();
