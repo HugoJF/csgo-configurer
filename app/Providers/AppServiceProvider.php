@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 use Wpb\String_Blade_Compiler\Facades\StringBlade;
 
@@ -20,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
 				'$1<?php variable(\'$2\', \$$2 ?? null, \'$3\'); ?>$3',
 				$value);
 		});
+
+		Schema::defaultStringLength(191);
 	}
 
 	/**
