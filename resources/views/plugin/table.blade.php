@@ -17,7 +17,7 @@
             <td>{{ $plugin->modified_at->diffForHumans() }}</td>
             
             <td style="white-space: nowrap;">
-                <a href="{{ route('plugin.show', $plugin) }}" class="btn btn-xs btn-success">View</a>
+                <a href="{{ route('plugin.show', $plugin) }}" class="btn btn-sm btn-success">View</a>
             </td>
         </tr>
     @endforeach

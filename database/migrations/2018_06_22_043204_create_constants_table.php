@@ -17,7 +17,8 @@ class CreateConstantsTable extends Migration
 			$table->increments('id');
 
 			$table->string('key');
-			$table->string('value');
+			$table->text('value');
+			$table->string('list')->nullable();
 
 			$table->integer('config_id')->unsigned();
 			$table->foreign('config_id')->references('id')->on('configs')->onDelete('cascade');

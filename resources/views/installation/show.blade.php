@@ -1,9 +1,27 @@
 @extends('layout.app')
 
 @section('content')
-    <h1>Installation: {{ $installation->name }}</h1>
+    @include('generics.breadcrumbs', ['items' => [
+        [
+            'route' => 'home',
+            'text' => 'Home'
+        ],
+        [
+            'route' => 'installation.index',
+            'text' => 'Installations'
+        ],
+        [
+            'route' => ['installation.show', $installation],
+            'text' => $installation->name
+        ]
+    ]])
+    <div class="page-header">
+        <h1>Installation
+            <small>{{ $installation->name }}</small>
+            <h4>{{ $installation->description }}</h4>
+        </h1>
+    </div>
     
-    <h4>{{ $installation->description }}</h4>
     
     <h2>Plugins</h2>
     <p>

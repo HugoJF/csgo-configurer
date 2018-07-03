@@ -1,7 +1,20 @@
 @extends('layout.app')
 
 @section('content')
-    <h1>Configs</h1>
+    @include('generics.breadcrumbs', ['items' => [
+        [
+            'route' => 'home',
+            'text' => 'Home'
+        ],
+        [
+            'route' => 'config.index',
+            'text' => 'Configs'
+        ],
+    ]])
+    <div class="page-header">
+        <h1>Configs</h1>
+    </div>
+    
     <p>
         <a href="{{ route('config.create') }}" id="generate" type="submit" name="generate" class="btn btn-default">
             <span class="glyphicon glyphicon-plus-sign"></span> Add new configs

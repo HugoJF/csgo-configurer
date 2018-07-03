@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PluginsSynchronizationRequest;
 use App\Plugin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -29,7 +30,30 @@ class PluginController extends Controller
 			'title'       => 'Plugin Form',
 			'form'        => $form,
 			'submit_text' => 'Create',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Plugins',
+					'route' => 'plugin.index',
+				],
+				[
+					'text' => 'Creating new plugins',
+					'url'  => url()->current(),
+				],
+			],
 		]);
+	}
+
+	public function sync()
+	{
+		event(new PluginsSynchronizationRequest());
+
+		flash()->success('Plugin synchronization requested!');
+
+		return redirect()->back();
 	}
 
 	public function store(Request $request)

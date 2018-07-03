@@ -43,4 +43,9 @@ class Plugin extends Model
 	{
 		return $this->belongsToMany('App\Installation')->withPivot(['config_id', 'priority'])->using('App\InstallationPlugin');
 	}
+
+	public function fieldLists()
+	{
+		return $this->hasMany('App\FieldList');
+	}
 }

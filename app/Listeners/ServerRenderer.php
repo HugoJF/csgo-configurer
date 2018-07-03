@@ -103,18 +103,6 @@ class ServerRenderer implements ShouldQueue
 		return $path;
 	}
 
-	private function attachRenderedFile(Server $server, $file)
-	{
-		$server_file = File::make();
-
-		$server_file->path = $this->stripFirstFolder($file->path);
-		$server_file->renderable = true;
-
-		$server_file->owner()->associate($server);
-
-		$server_file->save();
-	}
-
 	public function renderFile(Server $server, File $file)
 	{
 		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->stripFirstFolder($file->path);
@@ -127,8 +115,6 @@ class ServerRenderer implements ShouldQueue
 			$content = $raw_content;
 		}
 
-		$this->attachRenderedFile($server, $file);
-
-		Storage::disk('renders')->put($destination_path, $content);
+$		Storage::disk('renders')->put($destination_path, $content);
 	}
 }

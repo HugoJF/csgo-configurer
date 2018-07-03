@@ -12,11 +12,6 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class FileController extends Controller
 {
-	public function index(Plugin $plugin)
-	{
-
-	}
-
 	public function show_server_file(Server $server, File $file)
 	{
 		$content = null;
@@ -25,7 +20,30 @@ class FileController extends Controller
 			$content = Storage::disk('renders')->get($server->id . DIRECTORY_SEPARATOR . $file->path);
 		}
 
-		return $this->show($file, $content);
+		$breadcrumbs = [
+			[
+				'text'  => 'Home',
+				'route' => 'home',
+			],
+			[
+				'text'  => 'Servers',
+				'route' => 'server.index',
+			],
+			[
+				'text'  => $server->name,
+				'route' => ['server.show', $server],
+			],
+			[
+				'text'  => 'Files',
+				'route' => ['server.show', $server],
+			],
+			[
+				'text' => $file->path,
+				'url'  => url()->current(),
+			],
+		];
+
+		return $this->show($file, $content, $breadcrumbs);
 	}
 
 	public function show_plugin_file(Plugin $plugin, File $file)
@@ -36,14 +54,38 @@ class FileController extends Controller
 			$content = Storage::disk('plugins')->get($file->path);
 		}
 
-		return $this->show($file, $content);
+		$breadcrumbs = [
+			[
+				'text'  => 'Home',
+				'route' => 'home',
+			],
+			[
+				'text'  => 'Plugins',
+				'route' => 'plugin.index',
+			],
+			[
+				'text'  => $plugin->name,
+				'route' => ['plugin.show', $plugin],
+			],
+			[
+				'text'  => 'Files',
+				'route' => ['plugin.show', $plugin],
+			],
+			[
+				'text' => $file->path,
+				'url'  => url()->current(),
+			],
+		];
+
+		return $this->show($file, $content, $breadcrumbs);
 	}
 
-	private function show(File $file, $content)
+	private function show(File $file, $content, $breadcrumbs)
 	{
 		return view('file.show', [
-			'file'    => $file,
-			'content' => $content,
+			'file'        => $file,
+			'content'     => $content,
+			'breadcrumbs' => $breadcrumbs,
 		]);
 	}
 
@@ -80,7 +122,8 @@ class FileController extends Controller
 		$db_plugin_list = $plugins->pluck('folder');
 
 		foreach ($dir_plugin_list as $p) {
-			if (in_array($p, $db_plugin_list->toArray())) continue;
+			if (in_array($p, $db_plugin_list->toArray()))
+				continue;
 
 			$plugin = Plugin::make();
 
@@ -96,7 +139,8 @@ class FileController extends Controller
 		}
 
 		foreach ($db_plugin_list as $temp) {
-			if (in_array($temp, $dir_plugin_list)) continue;
+			if (in_array($temp, $dir_plugin_list))
+				continue;
 
 			Storage::disk('plugins')->makeDirectory($temp);
 		}

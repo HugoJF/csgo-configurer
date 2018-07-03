@@ -36,4 +36,52 @@ class Config extends Model
 	{
 		return $this->hasMany('App\InstallationConfig', 'config_id');
 	}
+
+	public function fieldLists()
+	{
+		if ($this->owner_type == 'App\User') {
+			return $this->fieldListsFromUser($this->owner);
+		} else if ($this->owner_type == 'App\Server') {
+			return $this->fieldListsFromServer($this->owner);
+		} else if ($this->owner_type == 'App\Plugin') {
+			return $this->fieldListsFromPlugin($this->owner);
+		} else {
+			throw new \Exception('Invalid owner type');
+		}
+	}
+
+	public function fieldListsFromUser($user)
+	{
+		$serverFieldLists = [];
+		foreach ($user->servers as $server) {
+			if ($server->installation) {
+				foreach ($server->installation->plugins as $plugin) {
+					foreach ($plugin->fieldLists as $fl) {
+						$serverFieldLists[] = $fl;
+					}
+				}
+			}
+		}
+
+		return $serverFieldLists;
+	}
+
+	public function fieldListsFromServer($server)
+	{
+		$serverFieldLists = [];
+		if ($server->installation) {
+			foreach ($server->installation->plugins as $plugin) {
+				foreach ($plugin->fieldLists as $fl) {
+					$serverFieldLists[] = $fl;
+				}
+			}
+		}
+
+		return $serverFieldLists;
+	}
+
+	public function fieldListsFromPlugin($plugin)
+	{
+		return $plugin->fieldLists;
+	}
 }

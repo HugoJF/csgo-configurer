@@ -5,7 +5,14 @@
 // Enable Deathmatch.
 // --
 // Default: yes
-"dm_enabled" "{{ variable('dm_enabled', $dm_enabled, 'true') }}"
+"dm_enabled" "{{ variable('', $, '') }}"
+
+
+"mensagem-de-vip" = {
+    "enabled" = "true"
+    "message" = "Comprem VIP"
+    "order"   = "99"
+}
 
 // Enable compatibility for Valve's Deathmatch (game_type 1 & game_mode 2) or Custom (game_type 3 & game_mode 0).
 // --

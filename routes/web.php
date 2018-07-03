@@ -14,7 +14,7 @@ Route::get('/home', function () {
 	return redirect('/');
 })->name('home');
 
-Route::get('sync', function (){
+Route::get('sync', function () {
 	event(new \App\Events\PluginsSynchronizationRequest());
 
 	return 'requested!';
@@ -56,18 +56,20 @@ Route::middleware(['logged'])->group(function () {
 		Route::post('/', 'ServerController@store')->name('store');
 
 		Route::patch('{server}', 'ServerController@update')->name('update');
+
+		Route::delete('{server}', 'ServerController@delete')->name('delete');
 	});
 
-	Route::prefix('contant')->name('constant.')->group(function () {
-		Route::get('{config}/constant/create', 'ConstantController@create')->name('create');
+	Route::prefix('constant')->name('constant.')->group(function () {
+		Route::get('{config}/constant/create/{field_list?}', 'ConstantController@create')->name('create');
 
 		Route::post('{config}/constant', 'ConstantController@store')->name('store');
 	});
 
 	Route::prefix('config')->name('config.')->group(function () {
+		Route::get('/', 'ConfigController@index')->name('index');
 		Route::get('create/{type?}/{id?}', 'ConfigController@create')->name('create');
 		Route::get('{config}', 'ConfigController@show')->name('show');
-		Route::get('/', 'ConfigController@index')->name('index');
 		Route::get('{config}/edit', 'ConfigController@edit')->name('edit');
 
 		Route::post('{type?}/{id?}', 'ConfigController@store')->name('store');
@@ -75,6 +77,28 @@ Route::middleware(['logged'])->group(function () {
 		Route::patch('{config}', 'ConfigController@update')->name('update');
 
 		Route::delete('{config}', 'ConfigController@delete')->name('delete');
+	});
+
+	Route::prefix('field-list')->name('field-list.')->group(function () {
+		Route::get('create/{plugin}', 'FieldListController@create')->name('create');
+		Route::get('{field_list}/edit', 'FieldListController@edit')->name('edit');
+
+		Route::post('{plugin}', 'FieldListController@store')->name('store');
+
+		Route::patch('{field_list}', 'FieldListController@update')->name('update');
+
+		Route::delete('{field_list}', 'FieldListController@delete')->name('delete');
+	});
+
+	Route::prefix('field')->name('field.')->group(function () {
+		Route::get('create/{field_list}', 'FieldController@create')->name('create');
+		Route::get('{field}/edit', 'FieldController@edit')->name('edit');
+
+		Route::post('{field_list}', 'FieldController@store')->name('store');
+
+		Route::patch('{field}', 'FieldController@update')->name('update');
+
+		Route::delete('{field}', 'FieldController@delete')->name('delete');
 	});
 
 	Route::prefix('files')->name('file.')->group(function () {
@@ -85,6 +109,7 @@ Route::middleware(['logged'])->group(function () {
 
 	Route::prefix('plugins')->name('plugin.')->group(function () {
 		Route::get('create', 'PluginController@create')->name('create');
+		Route::get('plugins', 'PluginController@sync')->name('sync');
 		Route::get('{plugin}', 'PluginController@show')->name('show');
 		Route::get('/', 'PluginController@index')->name('index');
 
@@ -97,3 +122,21 @@ Route::middleware(['logged'])->group(function () {
 		Route::get('servers/{server}/files/{file}', 'FileController@show_server_file')->name('server_show');
 	});
 });
+
+Route::get('config/{config}/variables', function (\App\Config $config) {
+	$fieldsLists = $config->fieldLists();
+	$variables = [];
+
+
+	foreach ($fieldsLists as $fieldsList) {
+		foreach ($fieldsList->fields as $field) {
+			$variables[] = $field->toArray();
+		}
+	}
+
+	foreach ($variables as $key => $variable) {
+		$variables[$key]['name'] = $variable['name'] . ' - ' . $variable['description'];
+	}
+
+	return $variables;
+})->name('test');

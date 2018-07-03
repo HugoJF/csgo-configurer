@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Constant extends Model
 {
 	protected $fillable = [
-		'key', 'value',
+		'key', 'value', 'list',
 	];
 
 	protected $guarded = [

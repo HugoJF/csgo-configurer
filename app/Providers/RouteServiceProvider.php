@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Config;
+use App\FieldList;
 use App\File;
 use App\Plugin;
 use Illuminate\Support\Facades\Route;
@@ -36,6 +37,10 @@ class RouteServiceProvider extends ServiceProvider
 
 		Route::bind('plugin', function ($value) {
 			return Plugin::where('slug', $value)->first();
+		});
+
+		Route::bind('field_list', function ($value) {
+			return FieldList::find($value);
 		});
 	}
 

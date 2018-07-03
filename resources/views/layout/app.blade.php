@@ -101,37 +101,6 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <h4 class="panel-title">
-                            <a data-toggle="collapse" data-parent="#accordion" href="#collapseZero">
-                                <span class="glyphicon glyphicon-asterisk"></span>Create
-                            </a>
-                        </h4>
-                    </div>
-                    <div id="collapseZero" class="panel-collapse collapse in">
-                        <ul class="list-group">
-                            <li class="list-group-item {{ Route::is('config.create') ? 'active' : ''}}">
-                                <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('config.create') }}">New Config</a>
-                            </li>
-                            <li class="list-group-item {{ Route::is('plugin.create') ? 'active' : ''}}">
-                                <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('plugin.create') }}">New Plugin</a>
-                            </li>
-                            <li class="list-group-item {{ Route::is('server.create') ? 'active' : ''}}">
-                                <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('server.create') }}">New Server</a>
-                            </li>
-                            <li class="list-group-item {{ Route::is('installation.create') ? 'active' : ''}}">
-                                <span class="glyphicon glyphicon-home"></span>
-                                <a id="home" href="{{ route('installation.create') }}">New Installation</a>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                
-                
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <h4 class="panel-title">
                             <a data-toggle="collapse" data-parent="#accordion" href="#collapseOne">
                                 <span class="glyphicon glyphicon-star"></span>Indexes
                             </a>
@@ -189,6 +158,7 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="{{ asset('/js/vendor/jquery.min.js') }}"><\/script>')</script>
 <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
+<script src="{{ asset('/js/bootstrap-typeahead.js') }}" type="text/javascript"></script>
 <script src="{{ asset('/js/moment.min.js') }}"></script>
 <script src="{{ asset('/js/bootstrap-datetimepicker.min.js') }}"></script>
 <!-- Just to make our placeholder images work. Don't actually copy the next line! -->

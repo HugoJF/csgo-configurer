@@ -56,7 +56,7 @@ class InstallationController extends Controller
 		$form = $formBuilder->create('App\Forms\SelectionForm', [
 			'method' => 'POST',
 			'url'    => route('installation.store-selection', [$installation, $plugin]),
-			'model' => $selection,
+			'model'  => $selection,
 		], [
 			'installations'         => [$installation],
 			'installation_selected' => $installation->id,
@@ -70,6 +70,32 @@ class InstallationController extends Controller
 			'form'        => $form,
 			'configs'     => $configs,
 			'submit_text' => 'Make config selection',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Installations',
+					'route' => 'installation.index',
+				],
+				[
+					'text'  => $installation->name,
+					'route' => ['installation.show', $installation],
+				],
+				[
+					'text'  => 'Plugins',
+					'route' => ['installation.show', $installation],
+				],
+				[
+					'text'  => $plugin->name,
+					'route' => ['installation.show', $installation],
+				],
+				[
+					'text' => 'Plugin configuration selection form',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
@@ -97,6 +123,20 @@ class InstallationController extends Controller
 			'title'       => 'Installation Form',
 			'form'        => $form,
 			'submit_text' => 'Submit new installation',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Installations',
+					'route' => 'installation.index',
+				],
+				[
+					'text' => 'Creating new installation',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
@@ -130,6 +170,24 @@ class InstallationController extends Controller
 			'title'       => 'Installation update form',
 			'form'        => $form,
 			'submit_text' => 'Update installation',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Installations',
+					'route' => 'installation.index',
+				],
+				[
+					'text'  => $installation->name,
+					'route' => ['installation.show', $installation],
+				],
+				[
+					'text' => 'Editing installation',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 

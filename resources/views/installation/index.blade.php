@@ -1,7 +1,19 @@
 @extends('layout.app')
 
 @section('content')
-    <h1>Installations</h1>
+    @include('generics.breadcrumbs', ['items' => [
+        [
+            'route' => 'home',
+            'text' => 'Home'
+        ],
+        [
+            'route' => 'installation.index',
+            'text' => 'Installations'
+        ],
+    ]])
+    <div class="page-header">
+        <h1>Installations</h1>
+    </div>
     <p>
         <a href="{{ route('installation.create') }}" id="generate" type="submit" name="generate" class="btn btn-default">
             <span class="glyphicon glyphicon-plus-sign"></span> Add new installation

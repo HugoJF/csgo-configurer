@@ -35,29 +35,40 @@ class Server extends Model
 		return $this->belongsTo('App\User');
 	}
 
-	private function getConfigs()
+	public function getPluginList()
 	{
-		$user = $this->user;
+		$plugins = [];
 
-		$configs = [];
-
-		if(!$this->installation) {
+		if (!$this->installation) {
 			return [];
 		}
 
-		$this->installation->load(['plugins' => function ($q) {
-			$q->orderBy('installation_plugin.priority', 'DESC');
-		}]);
-
-		$user_configs = $user->configs()->orderBy('priority', 'DESC')->get();
-		$server_configs = $this->configs()->orderBy('priority', 'DESC')->get();
-
-		foreach ($user_configs as $b) {
-			$configs[] = $b;
+		foreach ($this->installation->plugins as $plugin) {
+			$plugins[] = $plugin;
 		}
 
-		foreach ($server_configs as $b) {
-			$configs[] = $b;
+		return $plugins;
+	}
+
+	private function getConfigs()
+	{
+		$configs = [];
+
+		if ($this->installation) {
+			$this->installation->load(['plugins' => function ($q) {
+				$q->orderBy('installation_plugin.priority', 'DESC');
+			}]);
+		}
+
+		$user_configs = $this->user->configs()->orderBy('priority', 'DESC')->get();
+		$server_configs = $this->configs()->orderBy('priority', 'DESC')->get();
+
+		foreach ($user_configs as $config) {
+			$configs[] = $config;
+		}
+
+		foreach ($server_configs as $config) {
+			$configs[] = $config;
 		}
 
 		if ($this->installation) {
@@ -74,13 +85,33 @@ class Server extends Model
 	public function getConstants()
 	{
 		$configs = $this->getConfigs();
-		$config = [];
+
+		$finalConfig = [];
 		$constants = [];
 
-		foreach ($configs as $c) {
-			foreach ($c->constants as $constant) {
-				if (!array_key_exists($constant->key, $config)) {
-					$config[ $constant->key ] = $constant->value;
+		foreach ($configs as $config) {
+			foreach ($config->constants as $constant) {
+				if ($constant->list) {
+					if (!isset($finalConfig[ $constant->list ])) {
+						$finalConfig[ $constant->list ] = [];
+					}
+					if (!isset($constants[ $constant->list ])) {
+						$constants[ $constant->list ] = [];
+					}
+					$contains = false;
+					foreach ($finalConfig[$constant->list] as $item) {
+						if($item['key'] == $constant->key) {
+							$contains = true;
+						}
+					}
+					if (!$contains) {
+						$finalConfig[ $constant->list ][] = $constant->toArray();
+						$constants[ $constant->list ][] = $constant;
+					}
+					continue;
+				}
+				if (!array_key_exists($constant->key, $finalConfig)) {
+					$finalConfig[ $constant->key ] = $constant->value;
 					$constants[] = $constant;
 				}
 			}
@@ -88,12 +119,17 @@ class Server extends Model
 
 		return [
 			'constants' => $constants,
-			'config'    => $config,
+			'config'    => $finalConfig,
 		];
 	}
 
 	public function renderConfig()
 	{
 		return $this->getConstants()['config'];
+	}
+
+	public function renderConstants()
+	{
+		return $this->getConstants()['constants'];
 	}
 }

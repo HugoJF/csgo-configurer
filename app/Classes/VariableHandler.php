@@ -4,13 +4,14 @@ namespace App\Classes;
 
 class VariableHandler
 {
+	static $manifest = [];
 	static $rendering = true;
 	static $variables = [];
 
 	public static function variable($name, $value, $default)
 	{
 		if (static::$rendering) {
-			if ($value == null) {
+			if ($value !== null) {
 				return $value;
 			} else {
 				return $default;

@@ -1,7 +1,16 @@
 @extends('layout.app')
 
 @section('content')
-    <h1>{{ $file->path }}</h1>
+    @if(isset($breadcrumbs))
+        @include('generics.breadcrumbs', ['items' => $breadcrumbs])
+    @endif
+
+    <div class="page-header">
+        <h1>File
+            <small>{{ $file->path }}</small>
+        </h1>
+    </div>
+    
     <p>
         <a class="btn btn-primary" href="{{ route('file.edit', $file) }}">
             <span class="glyphicon glyphicon-pencil"></span> Edit

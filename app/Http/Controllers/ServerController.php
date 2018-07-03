@@ -66,6 +66,24 @@ class ServerController extends Controller
 			'title'       => 'Editing Server',
 			'form'        => $form,
 			'submit_text' => 'Update Server',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Servers',
+					'route' => 'server.index',
+				],
+				[
+					'text'  => $server->name,
+					'route' => ['server.show', $server],
+				],
+				[
+					'text' => 'Editing new server',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
@@ -91,6 +109,20 @@ class ServerController extends Controller
 			'title'       => 'Server Form',
 			'form'        => $form,
 			'submit_text' => 'Create Server',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Servers',
+					'route' => 'server.index',
+				],
+				[
+					'text' => 'Creating new server',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
@@ -107,5 +139,18 @@ class ServerController extends Controller
 		$server->save();
 
 		return redirect()->route('server.show', $server);
+	}
+
+	public function delete(Server $server)
+	{
+		$deleted = $server->delete();
+
+		if ($deleted) {
+			flash()->success('Server deleted!');
+		} else {
+			flash()->error('Server could not be deleted!');
+		}
+
+		return redirect()->back();
 	}
 }

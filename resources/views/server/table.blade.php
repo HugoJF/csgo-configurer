@@ -39,6 +39,9 @@
                 <a href="{{ route('server.edit', $server) }}" class="btn btn-xs btn-primary">Edit</a>
                 <a href="{{ route('server.render', $server) }}" class="btn btn-xs btn-primary">Render</a>
                 <a href="{{ route('server.sync', $server) }}" class="btn btn-xs btn-primary">Sync</a>
+                {!! Form::open(['route' => ['server.delete', $server], 'method' => 'DELETE', 'style' => 'display:inline']) !!}
+                <button class="btn btn-xs btn-danger">Delete</button>
+                {!! Form::close() !!}
             </td>
         </tr>
     @empty

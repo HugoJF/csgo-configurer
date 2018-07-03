@@ -40,6 +40,20 @@ class ConfigController extends Controller
 			'type'        => $type,
 			'id'          => $id,
 			'submit_text' => 'Create',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Configs',
+					'route' => 'config.index',
+				],
+				[
+					'text' => 'Creating new config',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
@@ -107,6 +121,20 @@ class ConfigController extends Controller
 			'title'       => 'Config Update Form',
 			'form'        => $form,
 			'submit_text' => 'Update',
+			'breadcrumbs' => [
+				[
+					'text'  => 'Home',
+					'route' => 'home',
+				],
+				[
+					'text'  => 'Configs',
+					'route' => 'config.index',
+				],
+				[
+					'text' => 'Editing config',
+					'url'  => url()->current(),
+				],
+			],
 		]);
 	}
 
