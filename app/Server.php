@@ -126,10 +126,10 @@ class Server extends Model
 
 			// Process lists
 			$finalConfig = $this->customMerge($finalConfig, $this->processLists($config->lists));
-
-			$translator = new CompoundVariableTranslator($finalConfig);
-			$translator->setModeException()->translate();
 		}
+		
+		$translator = new CompoundVariableTranslator($finalConfig);
+		$translator->setModeException()->translate();
 
 		return [
 			'constants' => $constants,
