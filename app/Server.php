@@ -77,13 +77,11 @@ class Server extends Model
 		$configs = [];
 
 		if ($this->installation) {
-			$this->installation->load(['plugins' => function ($q) {
-				$q->orderBy('installation_plugin.priority', 'DESC');
-			}]);
+			$this->installation->load(['plugins']);
 		}
 
-		$user_configs = $this->user->configs()->orderBy('priority', 'DESC')->get();
-		$server_configs = $this->configs()->orderBy('priority', 'DESC')->get();
+		$user_configs = $this->user->configs()->get();
+		$server_configs = $this->configs()->get();
 
 		foreach ($user_configs as $config) {
 			$configs[] = $config;
