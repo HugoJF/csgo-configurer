@@ -15,7 +15,8 @@ class PluginController extends Controller
 		$plugins = Plugin::all();
 
 		return view('plugin.index', [
-			'plugins' => $plugins,
+			'plugins'    => $plugins,
+			'breadcrumb' => Plugin::indexBreadcrumb(),
 		]);
 	}
 
@@ -30,20 +31,7 @@ class PluginController extends Controller
 			'title'       => 'Plugin Form',
 			'form'        => $form,
 			'submit_text' => 'Create',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Plugins',
-					'route' => 'plugin.index',
-				],
-				[
-					'text' => 'Creating new plugins',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumb'  => Plugin::indexBreadcrumb()->addCurrent('Creating new plugins'),
 		]);
 	}
 
@@ -70,7 +58,8 @@ class PluginController extends Controller
 	public function show(Plugin $plugin)
 	{
 		return view('plugin.show', [
-			'plugin' => $plugin,
+			'plugin'     => $plugin,
+			'breadcrumb' => $plugin->showBreadcrumb(),
 		]);
 	}
 }

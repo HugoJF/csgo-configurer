@@ -6,6 +6,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class Plugin extends Model
 {
+	use RoutesActions;
+
+	protected $routeNamePrefix = 'plugin.';
+
 	protected $dates = [
 		'created_at', 'updated_at', 'modified_at',
 	];
@@ -18,6 +22,22 @@ class Plugin extends Model
 	protected $fillable = [
 		'name', 'slug', 'description', 'folder', 'modified_at',
 	];
+
+	public static function indexBreadcrumb()
+	{
+		return homeBreadcrumb()->add([
+			'text'  => 'Plugins',
+			'route' => 'plugin.index',
+		]);
+	}
+
+	public function showBreadcrumb()
+	{
+		return Plugin::indexBreadcrumb()->add([
+			'text'  => $this->name,
+			'route' => ['plugin.show', $this],
+		]);
+	}
 
 	public function configs()
 	{
@@ -46,6 +66,11 @@ class Plugin extends Model
 
 	public function fieldLists()
 	{
-		return $this->hasMany('App\FieldList');
+		return $this->morphMany('App\FieldList', 'owner');
+	}
+
+	public function fields()
+	{
+		return $this->morphMany('App\Field', 'owner');
 	}
 }

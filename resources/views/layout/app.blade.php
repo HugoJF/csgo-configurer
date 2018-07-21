@@ -14,6 +14,7 @@
     <!-- Bootstrap core CSS -->
     <link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet">
     
+    
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <link href="{{ asset('/css/ie10-viewport-bug-workaround.css') }}" rel="stylesheet">
     
@@ -23,8 +24,10 @@
     <link href="{{ asset('/css/dataTables.bootstrap.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/bootstrap-datetimepicker.min.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/summernote.css') }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/css/bootstrap-select.min.css" rel="stylesheet">
     
-    @yield('head')
+    <link rel="stylesheet" href="{{ asset('/css/bootstrap-notifications.min.css') }}">
+    @stack('head')
     
     <style>
         #accordion .glyphicon {
@@ -53,6 +56,27 @@
         }
     </style>
     
+    <style>
+    
+        /* Constant table - used for disabled constants */
+        .table > thead > tr > td.inactive,
+        .table > tbody > tr > td.inactive,
+        .table > tfoot > tr > td.inactive,
+        .table > thead > tr > th.inactive,
+        .table > tbody > tr > th.inactive,
+        .table > tfoot > tr > th.inactive,
+        .table > thead > tr.inactive > td,
+        .table > tbody > tr.inactive > td,
+        .table > tfoot > tr.inactive > td,
+        .table > thead > tr.inactive > th,
+        .table > tbody > tr.inactive > th,
+        .table > tfoot > tr.inactive > th {
+            color: #e6e6e6;
+            text-decoration: line-through;
+        }
+        
+    </style>
+    
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]>
     <script src="{{ asset('/js/ie8-responsive-file-warning.js') }}"></script><![endif]-->
@@ -76,16 +100,44 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="{{ route('home') }}">@lang('messages.navbar-brand')</a>
+            <a class="navbar-brand" href="{{ route('home') }}">CS:GO Server Configurer</a>
         </div>
-        <div id="navbar" class="navbar-collapse collapse">
+        
+        <div class="collapse navbar-collapse">
+            <ul class="nav navbar-nav navbar-left">
+                <li class="dropdown dropdown-notifications">
+                    <a href="#notifications-panel" class="dropdown-toggle" data-toggle="dropdown">
+                        <i data-count="0" class="glyphicon glyphicon-bell notification-icon"></i>
+                    </a>
+                    
+                    <div class="dropdown-container">
+                        <div class="dropdown-toolbar">
+                            <div class="dropdown-toolbar-actions">
+                                <a href="#">Mark all as read</a>
+                            </div>
+                            <h3 class="dropdown-toolbar-title">Notifications (<span class="notif-count">0</span>)</h3>
+                        </div>
+                        <ul class="dropdown-menu">
+                        </ul>
+                        <div class="dropdown-footer text-center">
+                            <a href="#">View All</a>
+                        </div>
+                    </div>
+                </li>
+            </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li><a href="{{ route('users.settings') }}">@lang('messages.settings')</a></li>
-    
-                <li><a href="{{ route('logout') }}">@lang('messages.logout')</a></li>
-                <li><a href="{{ route('login') }}">@lang('messages.login')</a></li>
+                
+                <li><a href="{{ route('users.settings') }}">Settings</a></li>
+                
+                @if(Auth::user())
+                    <li><a href="{{ route('logout') }}">Logout</a></li>
+                @else
+                    <li><a href="{{ route('login') }}">Login</a></li>
+                @endif
             </ul>
         </div>
+    
+    
     </div>
 </nav>
 
@@ -127,9 +179,8 @@
                         </ul>
                     </div>
                 </div>
-                
-                
-                
+            
+            
             </div>
         </div>
         
@@ -145,6 +196,8 @@
             
             @include('flash::message')
             
+            @include('generics.breadcrumb', ['breadcrumb' => $breadcrumb ?? []])
+            
             @yield('content')
         </div>
         </footer>
@@ -156,6 +209,7 @@
 ================================================== -->
 <!-- Placed at the end of the document so the pages load faster -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+<script src="https://js.pusher.com/4.1/pusher.min.js"></script>
 <script>window.jQuery || document.write('<script src="{{ asset('/js/vendor/jquery.min.js') }}"><\/script>')</script>
 <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
 <script src="{{ asset('/js/bootstrap-typeahead.js') }}" type="text/javascript"></script>
@@ -169,6 +223,7 @@
 <script src="{{ asset('/js/jquery.dataTables.min.js') }}"></script>
 <script src="{{ asset('/js/dataTables.bootstrap.min.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.0/clipboard.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.12.4/js/bootstrap-select.min.js"></script>
 <script>
     var clipboard = new ClipboardJS('.clipboard-js');
 </script>
@@ -176,6 +231,8 @@
     $('#flash-overlay-modal').modal();
     $('div.alert').not('.alert-important').delay(5000).fadeOut(350);
 </script>
+
+<script src="{{ asset('/js/notifications.js') }}"></script>
 @stack('scripts')
 </body>
 </html>

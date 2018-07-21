@@ -16,7 +16,7 @@
         <tr>
             <td data-order="{{ $key }}"><code>{{ $file->path }}</code></td>
             <td>
-                <label class="label label-{{ $file->renderable ? 'success' : 'default' }}">{{ $file->renderable ? 'True' : 'False' }}</label>
+                <label class="label label-{{ $file->isRenderable() ? 'success' : 'default' }}">{{ $file->isRenderable() ? 'True' : 'False' }}</label>
             </td>
             <td>{{ $file->owner_type }}</td>
             <td>{{ $file->created_at->diffForHumans() }}</td>
@@ -31,6 +31,16 @@
                         }
                     @endphp
                     <a href="{{ route('file.show', [$pluginSlugCache, $file]) }}" class="btn btn-xs btn-success">View</a>
+                @endif
+                
+                @if($file->isRenderable())
+                    {!! Form::open(['route' => ['file.make-static', $file], 'method' => 'PATCH', 'style' => 'display:inline']) !!}
+                    <button class="btn btn-xs btn-warning">Make Static</button>
+                    {!! Form::close() !!}
+                @else
+                    {!! Form::open(['route' => ['file.make-renderable', $file], 'method' => 'PATCH', 'style' => 'display:inline']) !!}
+                    <button class="btn btn-xs btn-success">Make Renderable</button>
+                    {!! Form::close() !!}
                 @endif
                 <a href="{{ route('file.edit', $file) }}" class="btn btn-xs btn-primary">Edit</a>
             </td>

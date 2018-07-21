@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Events\GenericBroadcastEvent;
 use App\Events\ServerRenderRequest;
 use App\File;
 use App\Server;
@@ -35,6 +36,8 @@ class ServerRenderer implements ShouldQueue
 	 */
 	public function handle(ServerRenderRequest $event)
 	{
+		event(new GenericBroadcastEvent("Server rendering started!", "Server <code>{$event->server->name}</code> started template rendering!"));
+
 		$this->user = $event->user;
 
 		$server = $event->server;
@@ -50,11 +53,12 @@ class ServerRenderer implements ShouldQueue
 		$server->rendered_at = Carbon::now();
 
 		$server->save();
+
+		event(new GenericBroadcastEvent("Server rendering finished!", "Server <code>{$event->server->name}</code> finished template rendering successfully!"));
 	}
 
 	private function prepareFileList(Server $server)
 	{
-
 		$installation = $server->installation;
 		if (!$installation) {
 			return [];
@@ -77,12 +81,14 @@ class ServerRenderer implements ShouldQueue
 
 	private function prepareDirectory($directory)
 	{
+		Storage::disk('renders')->deleteDirectory($directory);
 		Storage::disk('renders')->makeDirectory($directory);
 	}
 
 	private function eraseServerFiles(Server $server)
 	{
-		foreach ($server->files as $file) {
+		// TODO: delete as SQL
+		foreach ($server->files()->rendered()->get() as $file) {
 			$file->delete();
 		}
 	}
@@ -105,16 +111,29 @@ class ServerRenderer implements ShouldQueue
 
 	public function renderFile(Server $server, File $file)
 	{
-		$destination_path = $server->id . DIRECTORY_SEPARATOR . $this->stripFirstFolder($file->path);
+		$destinationPath = $server->id . DIRECTORY_SEPARATOR . $this->stripFirstFolder($file->path);
 
-		$raw_content = Storage::disk('plugins')->get($file->path);
+		$rawContent = Storage::disk('plugins')->get($file->path);
 
 		if ($file->renderable) {
-			$content = view(['template' => $raw_content,], $server->renderConfig())->render();
+			$content = view(['template' => $rawContent,], $server->renderConfig())->render();
 		} else {
-			$content = $raw_content;
+			$content = $rawContent;
 		}
 
-$		Storage::disk('renders')->put($destination_path, $content);
+		Storage::disk('renders')->put($destinationPath, $content);
+
+		$this->attachRenderFile($server, $destinationPath);
+	}
+
+	public function attachRenderFile(Server $server, $renderPath)
+	{
+		$file = File::make();
+
+		$file->path = $renderPath;
+		$file->type = File::TYPE_RENDER;
+		$file->owner()->associate($server);
+
+		$file->save();
 	}
 }

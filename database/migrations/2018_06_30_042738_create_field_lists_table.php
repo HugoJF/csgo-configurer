@@ -20,8 +20,11 @@ class CreateFieldListsTable extends Migration
             $table->string('key');
             $table->string('description')->nullable();
 
-            $table->integer('plugin_id')->unsigned();
-            $table->foreign('plugin_id')->references('id')->on('plugins')->onDelete('cascade');
+            $table->unsignedInteger('owner_id');
+            $table->string('owner_type');
+
+            $table->unsignedInteger('file_id')->nullable();
+            $table->foreign('file_id')->references('id')->on('files')->onDelete('set null');
 
 			$table->timestamps();
         });

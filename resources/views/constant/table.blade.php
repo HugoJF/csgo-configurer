@@ -3,8 +3,6 @@
     <tr>
         <th>Key</th>
         <th>Value</th>
-        <th>Config</th>
-        <th>List</th>
         <th>Updated At</th>
         <th>Created At</th>
         <th>Actions</th>
@@ -12,35 +10,31 @@
     </thead>
     <tbody>
     @forelse($constants as $key => $constant)
-        @if(is_array($constant))
-            @continue
-        @endif
-        <tr>
+        <tr {{ $constant->active ? '' : 'class=inactive' }}>
             <td data-order="{{ $key }}">{{ $constant->key }}</td>
-            
-            @if($constant->list)
-                <td>
-                @foreach(json_decode($constant->value) as $k=>$v)
-                    @if($v)
-                            <label class="label label-primary">{{ $k }}: <u><span style="font-weight: 500">{{ $v }}</span></u></label>
-                    @endif
-                @endforeach
-                </td>
-            @else
-                <td>{{ $constant->value }}</td>
-            @endif
-            <td><a href="{{ route('config.show', $constant->config) }}">{{ $constant->config->name }}</a></td>
-            <td>{{ $constant->list ?? 'N/A' }}</td>
+            <td>{{ $constant->value }}</td>
             <td>{{ $constant->updated_at->diffForHumans() }}</td>
             <td>{{ $constant->created_at->diffForHumans() }}</td>
             
             <td style="white-space: nowrap;">
-                <a href="{{ route('config.show', $constant->config) }}" class="btn btn-xs btn-success">View</a>
+                @if($constant->active)
+                    <a title="Deactivate constant" href="{{ route('constant.deactivate', $constant) }}" class="btn btn-xs btn-danger">
+                        <span class="glyphicon glyphicon-off"></span>
+                    </a>
+                @else
+                    <a title="Activate constant" href="{{ route('constant.activate', $constant) }}" class="btn btn-xs btn-success">
+                        <span class="glyphicon glyphicon-off"></span>
+                    </a>
+                @endif
+                <a href="{{ route('constant.edit', $constant) }}" class="btn btn-xs btn-primary">Edit</a>
+                {!! Form::open(['route' => ['constant.delete', $constant], 'method' => 'DELETE', 'style' => 'display:inline']) !!}
+                <button class="btn btn-xs btn-danger">Delete</button>
+                {!! Form::close() !!}
             </td>
         </tr>
     @empty
         <tr>
-            <td align="center" colspan="7"><strong>No constants to display</strong></td>
+            <td align="center" colspan="5"><strong>No constants to display</strong></td>
         </tr>
     @endforelse
     

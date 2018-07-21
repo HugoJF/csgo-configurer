@@ -17,13 +17,11 @@ class CreateFilesTables extends Migration
             $table->increments('id');
 
             $table->string('path');
-
-            $table->boolean('renderable');
+            $table->string('type')->nullable();
 
             $table->integer('owner_id')->unsigned();
             $table->string('owner_type');
 
-            $table->softDeletes();
             $table->timestamps();
         });
     }

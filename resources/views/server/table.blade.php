@@ -1,3 +1,16 @@
+@push('head')
+    <style rel="stylesheet">
+        .blur {
+            filter: blur(4px);
+            transition: 3s -webkit-filter ease-in-out;
+        }
+        
+        .blur:hover {
+            filter: none;
+        }
+    </style>
+@endpush
+
 <table id="datatables" class="table table-bordered table-striped">
     <thead>
     <tr>
@@ -10,10 +23,6 @@
         <th>@lang('messages.server-ftp-password')</th>
         <th>@lang('messages.server-ftp-root')</th>
         <th>@lang('messages.last-update')</th>
-        <th>Render Requested At</th>
-        <th>Rendered At</th>
-        <th>Sync Requested At</th>
-        <th>Synced At</th>
         <th>@lang('messages.actions')</th>
     </tr>
     </thead>
@@ -23,16 +32,12 @@
             <td data-order="{{ $key }}">{{ $server->name }}</td>
             <td>{{ $server->ip }}</td>
             <td>{{ $server->port }}</td>
-            <td>{{ $server->password }}</td>
+            <td><span class="blur">{{ $server->password }}</span></td>
             <td>{{ $server->ftp_host }}</td>
             <td>{{ $server->ftp_user }}</td>
-            <td>{{ $server->ftp_password }}</td>
+            <td><span class="blur">{{ $server->ftp_password }}</span></td>
             <td>{{ $server->ftp_root }}</td>
             <td>{{ $server->updated_at->diffForHumans() }}</td>
-            <td>{{ $server->render_requested_at ? $server->render_requested_at->diffForHumans() : trans('messages.never') }}</td>
-            <td>{{ $server->rendered_at ? $server->rendered_at->diffForHumans() : trans('messages.never') }}</td>
-            <td>{{ $server->sync_requested_at ? $server->sync_requested_at->diffForHumans() : trans('messages.never') }}</td>
-            <td>{{ $server->synced_at ? $server->synced_at->diffForHumans() : trans('messages.never') }}</td>
             
             <td style="white-space: nowrap;">
                 <a href="{{ route('server.show', $server) }}" class="btn btn-xs btn-success">View</a>
@@ -45,7 +50,7 @@
             </td>
         </tr>
     @empty
-    
+        
         <tr>
             <td align="center" colspan="14"><strong>No servers to display</strong></td>
         </tr>

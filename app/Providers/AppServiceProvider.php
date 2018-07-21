@@ -15,14 +15,14 @@ class AppServiceProvider extends ServiceProvider
 	 */
 	public function boot()
 	{
+		Schema::defaultStringLength(191);
+
 		StringBlade::extend(function ($value) {
 			return preg_replace(
 				'/(\s*)@variable\(\'([a-zA-Z0-9_]+):([a-zA-Z0-9_]+)\'\)(\s*)/',
 				'$1<?php variable(\'$2\', \$$2 ?? null, \'$3\'); ?>$3',
 				$value);
 		});
-
-		Schema::defaultStringLength(191);
 	}
 
 	/**

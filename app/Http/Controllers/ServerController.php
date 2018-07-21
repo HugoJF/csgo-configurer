@@ -22,7 +22,8 @@ class ServerController extends Controller
 		$servers = Auth::user()->servers;
 
 		return view('server.index', [
-			'servers' => $servers,
+			'servers'    => $servers,
+			'breadcrumb' => Installation::indexBreadcrumb(),
 		]);
 	}
 
@@ -44,11 +45,20 @@ class ServerController extends Controller
 		return redirect()->back();
 	}
 
+	public function renderConfig(Server $server)
+	{
+		return view('pre', [
+			'title'     => "{$server->name} - Rendering Config",
+			'code'   => json_encode($server->renderConfig()),
+			'breadcrumb' => $server->showBreadcrumb()->addCurrent('Rendering config'),
+		]);
+	}
 
 	public function show(Server $server)
 	{
 		return view('server.show', [
-			'server' => $server,
+			'server'     => $server,
+			'breadcrumb' => $server->showBreadcrumb(),
 		]);
 	}
 
@@ -66,24 +76,7 @@ class ServerController extends Controller
 			'title'       => 'Editing Server',
 			'form'        => $form,
 			'submit_text' => 'Update Server',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Servers',
-					'route' => 'server.index',
-				],
-				[
-					'text'  => $server->name,
-					'route' => ['server.show', $server],
-				],
-				[
-					'text' => 'Editing new server',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => $server->showBreadcrumb()->addCurrent('Editing new server'),
 		]);
 	}
 
@@ -109,20 +102,7 @@ class ServerController extends Controller
 			'title'       => 'Server Form',
 			'form'        => $form,
 			'submit_text' => 'Create Server',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Servers',
-					'route' => 'server.index',
-				],
-				[
-					'text' => 'Creating new server',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => Server::indexBreadcrumb()->addCurrent('Creating new server'),
 		]);
 	}
 

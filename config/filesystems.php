@@ -57,6 +57,10 @@ return [
 			'driver' => 'local',
 			'root' => storage_path('renders'),
 		],
+		'backup' => [
+			'driver' => 'local',
+			'root' => storage_path('backup'),
+		],
 
 		'public' => [
 			'driver'     => 'local',

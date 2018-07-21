@@ -12,80 +12,60 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class FileController extends Controller
 {
-	public function show_server_file(Server $server, File $file)
+	public function makeStatic(File $file)
 	{
-		$content = null;
+		$file->type = File::TYPE_STATIC;
 
-		if ($file->renderable) {
-			$content = Storage::disk('renders')->get($server->id . DIRECTORY_SEPARATOR . $file->path);
-		}
+		$file->save();
 
-		$breadcrumbs = [
-			[
-				'text'  => 'Home',
-				'route' => 'home',
-			],
-			[
-				'text'  => 'Servers',
-				'route' => 'server.index',
-			],
-			[
-				'text'  => $server->name,
-				'route' => ['server.show', $server],
-			],
-			[
-				'text'  => 'Files',
-				'route' => ['server.show', $server],
-			],
-			[
-				'text' => $file->path,
-				'url'  => url()->current(),
-			],
-		];
+		flash()->success('Marked file as static!');
 
-		return $this->show($file, $content, $breadcrumbs);
+		return redirect()->back();
 	}
 
-	public function show_plugin_file(Plugin $plugin, File $file)
+	public function makeRenderable(File $file)
+	{
+		$file->type = File::TYPE_RENDERABLE;
+
+		$file->save();
+
+		flash()->success('Marked file as renderable!');
+
+		return redirect()->back();
+	}
+
+	public function showServerFile(Server $server, File $file)
+	{
+		if ($file->isRenderable()) {
+			$content = Storage::disk('renders')->get($server->id . DIRECTORY_SEPARATOR . $file->path);
+		} else {
+			$content = null;
+		}
+
+		$breadcrumb = $file->showBreadcrumb();
+
+		return $this->show($file, $content, $breadcrumb);
+	}
+
+	public function showPluginFile(Plugin $plugin, File $file)
 	{
 		$content = null;
 
-		if ($file->renderable) {
+		if ($file->isRenderable()) {
 			$content = Storage::disk('plugins')->get($file->path);
 		}
 
-		$breadcrumbs = [
-			[
-				'text'  => 'Home',
-				'route' => 'home',
-			],
-			[
-				'text'  => 'Plugins',
-				'route' => 'plugin.index',
-			],
-			[
-				'text'  => $plugin->name,
-				'route' => ['plugin.show', $plugin],
-			],
-			[
-				'text'  => 'Files',
-				'route' => ['plugin.show', $plugin],
-			],
-			[
-				'text' => $file->path,
-				'url'  => url()->current(),
-			],
-		];
+		$breadcrumb = $file->showBreadcrumb();
 
-		return $this->show($file, $content, $breadcrumbs);
+		return $this->show($file, $content, $breadcrumb);
 	}
 
-	private function show(File $file, $content, $breadcrumbs)
+	private function show(File $file, $content, $breadcrumb)
 	{
 		return view('file.show', [
-			'file'        => $file,
-			'content'     => $content,
-			'breadcrumbs' => $breadcrumbs,
+			'file'       => $file,
+			'content'    => $content,
+			'breadcrumb' => $breadcrumb,
 		]);
 	}
 
@@ -101,19 +81,21 @@ class FileController extends Controller
 			'title'       => 'File update form',
 			'form'        => $form,
 			'submit_text' => 'Update File',
+			'breadcrumb'  => $file->showBreadcrumb()->addCurrent("Editing file {$file->name}"),
 		]);
 	}
 
 	public function update(Request $request, File $file)
 	{
-		$file->fill($request->all() + ['renderable' => 0]);
+		$file->fill($request->all());
+		$file->type = $request->get('renderable') ? File::TYPE_RENDERABLE : File::TYPE_STATIC;
 
 		$file->save();
 
 		return redirect()->route('file.show', [$file->owner->slug, $file]);
 	}
 
-	public function sync_folders()
+	public function syncFolders()
 	{
 		$plugins = Plugin::all();
 
@@ -139,14 +121,13 @@ class FileController extends Controller
 		}
 
 		foreach ($db_plugin_list as $temp) {
-			if (in_array($temp, $dir_plugin_list))
-				continue;
-
-			Storage::disk('plugins')->makeDirectory($temp);
+			if (!in_array($temp, $dir_plugin_list)){
+				Storage::disk('plugins')->makeDirectory($temp);
+			}
 		}
 	}
 
-	public function sync_plugins_files()
+	public function syncPluginsFiles()
 	{
 		$plugin_list = Storage::disk('plugins')->directories();
 
@@ -155,7 +136,7 @@ class FileController extends Controller
 
 			$plugin = Plugin::where('folder', $p)->first();
 
-			$current_files = $plugin->files()->withTrashed()->get();
+			$current_files = $plugin->files()->get();
 
 			$current_files_list = $current_files->pluck('path');
 
@@ -164,12 +145,12 @@ class FileController extends Controller
 					$f = File::make();
 
 					$f->path = $file;
-					$f->renderable = false;
+					$f->type = File::TYPE_RENDERABLE;
 					$f->owner()->associate($plugin);
 
 					$f->save();
 				} else {
-					$f = $plugin->files()->withTrashed()->where('path', $file)->first();
+					$f = $plugin->files()->where('path', $file)->first();
 					if ($f && $f->trashed()) {
 						$f->restore();
 					}
@@ -178,7 +159,9 @@ class FileController extends Controller
 
 			foreach ($current_files_list as $c) {
 				if (!in_array($c, $plugin_files)) {
-					$f = $plugin->files()->where('path', $c)->first()->delete();
+					$f = $plugin->files()->where('path', $c)->first();
+					if ($f)
+						$f->delete();
 				}
 			}
 		}

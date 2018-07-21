@@ -12,27 +12,20 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class ConfigController extends Controller
 {
-	public function create(FormBuilder $formBuilder, $type = null, $id = null)
+	public function create(FormBuilder $formBuilder, $type = 'user', $id = null)
 	{
 		$form = $formBuilder->create('App\Forms\ConfigForm', [
 			'method' => 'POST',
 			'url'    => route('config.store', [$type, $id]),
 		]);
 
-		switch ($type) {
-			case null:
-			case 'user':
-				$title = 'User Config Form';
-				break;
-			case 'plugin':
-				$title = 'Plugin Config Form';
-				break;
-			case 'server':
-				$title = 'Server Config Form';
-				break;
-			default:
-				$title = 'Unknown Config Form';
-		}
+		$titles = [
+			'user'   => 'User Config Form',
+			'plugin' => 'Plugin Config Form',
+			'server' => 'Server Config Form',
+		];
+
+		$title = $titles[ $type ] ?? 'Unknown Config Form';
 
 		return view('generics.form', [
 			'title'       => $title,
@@ -40,31 +33,15 @@ class ConfigController extends Controller
 			'type'        => $type,
 			'id'          => $id,
 			'submit_text' => 'Create',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Configs',
-					'route' => 'config.index',
-				],
-				[
-					'text' => 'Creating new config',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => Config::indexBreadcrumb()->addCurrent('Creating new config'),
 		]);
 	}
 
 	public function store($type = null, $id = null)
 	{
-
 		$config = Config::make();
 
 		$config->fill(Input::all());
-
-		$owner = null;
 
 		if ($type == 'user' || $type == null) {
 			$owner = Auth::user();
@@ -72,6 +49,8 @@ class ConfigController extends Controller
 			$owner = Server::where('id', $id)->first();
 		} else if ($type == 'plugin') {
 			$owner = Plugin::where('slug', $id)->first();
+		} else {
+			$owner = null;
 		}
 
 		$config->owner()->associate($owner);
@@ -86,7 +65,8 @@ class ConfigController extends Controller
 		$configs = Config::all();
 
 		return view('config.index', [
-			'configs' => $configs,
+			'configs'    => $configs,
+			'breadcrumb' => Config::indexBreadcrumb(),
 		]);
 	}
 
@@ -101,11 +81,11 @@ class ConfigController extends Controller
 
 	public function show(Config $config)
 	{
-
 		$config->load('constants');
 
 		return view('config.show', [
-			'config' => $config,
+			'config'     => $config,
+			'breadcrumb' => $config->showBreadcrumb(),
 		]);
 	}
 
@@ -121,20 +101,7 @@ class ConfigController extends Controller
 			'title'       => 'Config Update Form',
 			'form'        => $form,
 			'submit_text' => 'Update',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Configs',
-					'route' => 'config.index',
-				],
-				[
-					'text' => 'Editing config',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => Config::indexBreadcrumb()->addCurrent('Editing config'),
 		]);
 	}
 

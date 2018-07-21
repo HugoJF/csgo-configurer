@@ -2,52 +2,52 @@
 
 namespace App\Forms;
 
+use Illuminate\Http\Request;
 use Kris\LaravelFormBuilder\Form;
 
 class ConstantForm extends Form
 {
 	public function buildForm()
 	{
-		$customFields = $this->getData('customFields', []);
+		$this->key();
+		$this->value();
+		$this->active();
+	}
 
-		$this
-			->add('key', 'text', [
-				'attr' => [
-					'id'           => 'giantpotato',
-					'spellcheck'   => 'off',
-					'autocomplete' => 'off',
-				],
-			]);
+	private function key()
+	{
+		$request = app('request');
 
-		if (count($customFields) == 0) {
-			$this->addConstantFields();
-		} else {
-			$this->addCustomFields($customFields);
+		if ($request->input('key')) {
+			$options = [
+				'attr'          => ['readonly'],
+				'default_value' => $request->input('key'),
+			];
 		}
+
+		$options['attr']['spellcheck'] = 'off';
+		$options['attr']['autocomplete'] = 'off';
+
+		$this->add('key', 'text', $options ?? []);
 	}
 
-	private function addConstantFields()
+	private function value()
 	{
-		$this->add('value', 'text');
-		$this->add('list', 'text');
-	}
-
-	private function addCustomFields($customFields)
-	{
-		$this->add('list', 'text', [
-			'attr'  => [
-				'readonly' => 'readonly',
+		$this->add('value', 'text', [
+			'attr' => [
+				'spellcheck'   => 'off',
+				'autocomplete' => 'off',
 			],
-			'value' => $this->getData('list'),
 		]);
+	}
 
-		foreach ($customFields as $field) {
-			$this->add($field->key, 'text', [
-				'label' => $field->name,
-				'attr'  => [
-					'placeholder' => $field->default,
-				],
-			]);
+	private function active()
+	{
+		if(!$this->getModel()) {
+			$opts = [
+				'checked' => true,
+			];
 		}
+		$this->add('active', 'checkbox', $opts ?? []);
 	}
 }

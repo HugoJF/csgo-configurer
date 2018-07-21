@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Events\GenericBroadcastEvent;
 use App\Events\PluginsSynchronizationRequest;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -28,7 +29,9 @@ class PluginsFolderSynchronizer implements ShouldQueue
      */
     public function handle(PluginsSynchronizationRequest $event)
     {
-		app('App\Http\Controllers\FileController')->sync_folders();
-		app('App\Http\Controllers\FileController')->sync_plugins_files();
+    	event(new GenericBroadcastEvent('Plugin folder synchronization started!', 'Plugin template folder synchronization started!'));
+		app('App\Http\Controllers\FileController')->syncFolders();
+		app('App\Http\Controllers\FileController')->syncPluginsFiles();
+		event(new GenericBroadcastEvent('Plugin folder synchronization finished!', 'Plugin template folder synchronization finished successfully!'));
     }
 }

@@ -16,13 +16,15 @@ class CreateFieldsTable extends Migration
 		Schema::create('fields', function (Blueprint $table) {
 			$table->increments('id');
 
-			$table->string('name');
-			$table->string('description');
-			$table->string('key');
-			$table->string('default');
+			$table->boolean('required');
 
-			$table->unsignedInteger('field_list_id');
-			$table->foreign('field_list_id')->references('id')->on('field_lists');
+			$table->string('name');
+			$table->text('description');
+			$table->string('key');
+			$table->string('default')->nullable();
+
+			$table->unsignedInteger('owner_id');
+			$table->string('owner_type');
 
 			$table->timestamps();
 		});

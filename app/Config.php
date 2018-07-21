@@ -2,10 +2,12 @@
 
 namespace App;
 
+use App\Classes\Breadcrumb;
 use Illuminate\Database\Eloquent\Model;
 
 class Config extends Model
 {
+	use RoutesActions;
 
 	protected $guarded = [
 		'user_id',
@@ -17,9 +19,33 @@ class Config extends Model
 		'priority',
 	];
 
+	protected $routeNamePrefix = 'config.';
+
 	public function getRouteKeyName()
 	{
 		return 'slug';
+	}
+
+	public static function indexBreadcrumb($owner = null)
+	{
+		if ($owner === null) {
+			$bc = homeBreadcrumb();
+		} else {
+			$bc = $owner->showBreadcrumb();
+		}
+
+		return $bc->add([
+			'text'  => 'Configs',
+			'route' => 'config.index',
+		]);
+	}
+
+	public function showBreadcrumb()
+	{
+		return Config::indexBreadcrumb($this->owner)->add([
+			'text'  => $this->name,
+			'route' => ['config.show', $this],
+		]);
 	}
 
 	public function owner()
@@ -29,7 +55,12 @@ class Config extends Model
 
 	public function constants()
 	{
-		return $this->hasMany('App\Constant');
+		return $this->morphMany('App\Constant', 'owner');
+	}
+
+	public function lists()
+	{
+		return $this->morphMany('App\List_', 'owner');
 	}
 
 	public function selections()

@@ -1,20 +1,6 @@
 @extends('layout.app')
 
 @section('content')
-    @include('generics.breadcrumbs', ['items' => [
-        [
-            'route' => 'home',
-            'text' => 'Home'
-        ],
-        [
-            'route' => 'server.index',
-            'text' => 'Servers'
-        ],
-        [
-            'route' => ['server.show', $server],
-            'text' => $server->name
-        ]
-    ]])
     <div class="page-header">
         <h1>Server
             <small>{{ $server->name }}</small>
@@ -59,12 +45,24 @@
     
     <h2>Server variables</h2>
     @include('constant.table', ['constants' => $server->getConstants()['constants']])
-    
-    <h2>Server Config</h2>
-    <pre>
-        {{ json_encode($server->renderConfig()) }}
-    </pre>
-    
+
+    <h2>Server render config order</h2>
+    <p>
+        <a href="{{ route('config.create', ['server', $server]) }}" id="generate" type="submit" name="generate" class="btn btn-default">
+            <span class="glyphicon glyphicon-plus-sign"></span> Create config for this server
+        </a>
+    </p>
+    @include('config.table', ['configs' => $server->getConfigs()])
+
     <h2>Server rendered files</h2>
-    @include('file.table', ['files' => $server->files])
+    @include('file.table', ['files' => $server->files()->rendered()->get()])
+    
+    <h2>Server backup files</h2>
+    @include('file.table', ['files' => $server->files()->backup()->get()])
+    
+    <h2>Server synced files</h2>
+    @include('file.table', ['files' => $server->files()->synced()->get()])
+    
+    <h2>Server render config</h2>
+    @include('generics.pre', ['code' => $server->renderConfig()])
 @endsection

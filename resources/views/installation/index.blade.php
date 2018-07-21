@@ -1,16 +1,6 @@
 @extends('layout.app')
 
 @section('content')
-    @include('generics.breadcrumbs', ['items' => [
-        [
-            'route' => 'home',
-            'text' => 'Home'
-        ],
-        [
-            'route' => 'installation.index',
-            'text' => 'Installations'
-        ],
-    ]])
     <div class="page-header">
         <h1>Installations</h1>
     </div>

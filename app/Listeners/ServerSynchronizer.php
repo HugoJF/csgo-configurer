@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Events\GenericBroadcastEvent;
 use App\Events\ServerSynchronizationRequest;
 use App\File;
 use App\Server;
@@ -40,6 +41,8 @@ class ServerSynchronizer implements ShouldQueue
 	 */
 	public function handle(ServerSynchronizationRequest $event)
 	{
+		event(new GenericBroadcastEvent('Server synchronization started!', "Server <code>{$event->server->name}</code> synchronization started!"));
+
 		$server = $event->server;
 
 		$this->createFtpConnection($server);
@@ -50,11 +53,21 @@ class ServerSynchronizer implements ShouldQueue
 
 		$this->deleteFiles($deletionList);
 
-		$this->syncFiles($server, $files);
+		$this->restoreBackupFiles($server, $deletionList);
 
+		$this->wipeSyncFiles($server);
+
+		$this->syncFiles($server, $files);
 
 		$event->server->synced_at = Carbon::now();
 		$event->server->save();
+
+		event(new GenericBroadcastEvent('Server synchronization finished!', "Server <code>{$event->server->name}</code> synchronization finished successfully!"));
+	}
+
+	private function wipeSyncFiles(Server $server)
+	{
+		$server->files()->synced()->delete();
 	}
 
 	public function createFtpConnection($server)
@@ -87,32 +100,50 @@ class ServerSynchronizer implements ShouldQueue
 		$file->delete();
 	}
 
+	private function backupFile(Server $server, string $destinationPath)
+	{
+		$backupPath = $destinationPath;
+		$fileContent = $this->destination_server->get($destinationPath);
+
+		Storage::disk('backup')->put($this->getServerFolder($server) . $backupPath, $fileContent);
+
+		$file = File::make();
+
+		$file->path = $backupPath;
+		$file->type = File::TYPE_BACKUP;
+		$file->owner()->associate($server);
+
+		$file->save();
+	}
+
 	public function syncFile(Server $server, File $file)
 	{
 		$destinationPath = $this->stripFirstFolder($file->path);
-		$renderPath = $server->id . DIRECTORY_SEPARATOR . $destinationPath;
+		$renderPath = $this->getServerFolder($server) . $destinationPath;
 
 		$renderedContent = Storage::disk('renders')->get($renderPath);
-		$renderedContentSize = Storage::disk('renders')->size($renderPath);
-		$renderedContentLastModified = Storage::disk('renders')->lastModified($renderPath);
+		$renderedSize = Storage::disk('renders')->size($renderPath);
 
 		$destinationExists = $this->destination_server->exists($destinationPath);
 		if ($destinationExists) {
-			$destinationSize = $this->destination_server->size($destinationPath);
-			$destinationLastModified = $this->destination_server->lastModified($destinationPath);
+			$destinationSize = $this->destination_server->size($destinationPath);;
 		}
 
 		$shouldSync = $this->forced
 			|| !$destinationExists
-			|| $renderedContentSize != $destinationSize
-			|| $renderedContentLastModified != $destinationLastModified;
+			|| $renderedSize != $destinationSize;
+
+		$shouldBackup = $shouldSync && !$server->files()->backup()->where('path', $destinationPath)->exists();
+
+		if ($shouldBackup) {
+			$this->backupFile($server, $destinationPath);
+		}
 
 		if ($shouldSync) {
 			$this->destination_server->put($destinationPath, $renderedContent);
 		}
-		if (!$destinationExists) {
-			$this->attachSyncedFile($server, $file);
-		}
+
+		$this->attachSyncedFile($server, $file);
 	}
 
 	private function attachSyncedFile(Server $server, File $file)
@@ -120,8 +151,7 @@ class ServerSynchronizer implements ShouldQueue
 		$server_file = File::make();
 
 		$server_file->path = $this->stripFirstFolder($file->path);
-		$server_file->renderable = true;
-
+		$server_file->type = File::TYPE_SYNC;
 		$server_file->owner()->associate($server);
 
 		$server_file->save();
@@ -146,7 +176,6 @@ class ServerSynchronizer implements ShouldQueue
 			$q->orderBy('installation_plugin.priority', 'ASC');
 		}]);
 
-
 		$files = [];
 
 		foreach ($installation->plugins as $plugin) {
@@ -161,16 +190,44 @@ class ServerSynchronizer implements ShouldQueue
 	private function prepareDeletionList(Server $server, $files)
 	{
 		/** @var Collection $serverFiles */
-		$serverFiles = $server->files;
+		$serverFiles = $server->files()->synced()->get();
 
 		$files = collect($files);
 
-		$deletionList = $serverFiles->filter(function ($value, $key) use ($serverFiles, $files) {
-			return !$files->contains(function ($v, $k) use ($value) {
+		$deletionList = $serverFiles->reject(function ($value, $key) use ($serverFiles, $files) {
+			return $files->contains(function ($v, $k) use ($value) {
 				return $this->stripFirstFolder($v->path) == $value->path;
 			});
 		});
 
 		return $deletionList;
+	}
+
+	private function restoreBackupFiles(Server $server, Collection $deletionList)
+	{
+		foreach ($deletionList as $deleted) {
+			$backup = $server->files()->backup()->where('path', $deleted->path)->first();
+			if ($backup) {
+				$this->restoreBackupFile($server, $backup);
+			}
+		}
+	}
+
+	private function restoreBackupFile(Server $server, File $backup)
+	{
+		$filePath = $this->getServerFolder($server) . $backup->path;
+
+		$backupContent = Storage::disk('backup')->get($filePath);
+
+		$this->destination_server->put($backup->path, $backupContent);
+
+		$backup->delete();
+
+		Storage::disk('backup')->delete($this->getServerFolder($server) . $backup->path);
+	}
+
+	private function getServerFolder(Server $server)
+	{
+		return $server->id . DIRECTORY_SEPARATOR;
 	}
 }

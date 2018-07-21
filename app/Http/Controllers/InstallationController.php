@@ -18,6 +18,7 @@ class InstallationController extends Controller
 
 		return view('installation.index', [
 			'installations' => $installations,
+			'breadcrumb'    => Installation::indexBreadcrumb(),
 		]);
 	}
 
@@ -70,32 +71,7 @@ class InstallationController extends Controller
 			'form'        => $form,
 			'configs'     => $configs,
 			'submit_text' => 'Make config selection',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Installations',
-					'route' => 'installation.index',
-				],
-				[
-					'text'  => $installation->name,
-					'route' => ['installation.show', $installation],
-				],
-				[
-					'text'  => 'Plugins',
-					'route' => ['installation.show', $installation],
-				],
-				[
-					'text'  => $plugin->name,
-					'route' => ['installation.show', $installation],
-				],
-				[
-					'text' => 'Plugin configuration selection form',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => $installation->showBreadcrumb()->addCurrent('Plugin configuration selection form'),
 		]);
 	}
 
@@ -123,20 +99,7 @@ class InstallationController extends Controller
 			'title'       => 'Installation Form',
 			'form'        => $form,
 			'submit_text' => 'Submit new installation',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Installations',
-					'route' => 'installation.index',
-				],
-				[
-					'text' => 'Creating new installation',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => Installation::indexBreadcrumb()->addCurrent('Creating new installation'),
 		]);
 	}
 
@@ -155,6 +118,7 @@ class InstallationController extends Controller
 	{
 		return view('installation.show', [
 			'installation' => $installation,
+			'breadcrumb'   => $installation->showBreadcrumb(),
 		]);
 	}
 
@@ -170,24 +134,7 @@ class InstallationController extends Controller
 			'title'       => 'Installation update form',
 			'form'        => $form,
 			'submit_text' => 'Update installation',
-			'breadcrumbs' => [
-				[
-					'text'  => 'Home',
-					'route' => 'home',
-				],
-				[
-					'text'  => 'Installations',
-					'route' => 'installation.index',
-				],
-				[
-					'text'  => $installation->name,
-					'route' => ['installation.show', $installation],
-				],
-				[
-					'text' => 'Editing installation',
-					'url'  => url()->current(),
-				],
-			],
+			'breadcrumbs' => $installation->showBreadcrumb()->addCurrent('Editing installation'),
 		]);
 	}
 

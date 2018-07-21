@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 use App\Config;
+use App\Constant;
 use App\FieldList;
 use App\File;
+use App\List_;
 use App\Plugin;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
@@ -41,6 +43,10 @@ class RouteServiceProvider extends ServiceProvider
 
 		Route::bind('field_list', function ($value) {
 			return FieldList::find($value);
+		});
+
+		Route::bind('list', function ($value) {
+			return List_::find($value);
 		});
 	}
 

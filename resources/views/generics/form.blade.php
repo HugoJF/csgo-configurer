@@ -1,9 +1,6 @@
 @extends('layout.app')
 
 @section('content')
-    @if(isset($breadcrumbs))
-        @include('generics.breadcrumbs', ['items' => $breadcrumbs])
-    @endif
     <div class="page-header">
         <h1>{{ $title }}</h1>
     </div>
@@ -24,13 +21,26 @@
     @push('scripts')
         <script>
             $(function () {
-                $('#giantpotato').typeahead({
-                    ajax: '{{ route('test', $config) }}',
+                $('#key').typeahead({
+                    ajax: '{{ route('plugin.fields', $config->owner) }}',
                     valueField: 'key',
-                    val: 'key',
-                    displayField: 'name'
+                    displayField: 'display'
+                });
+            });
+            
+            $(function () {
+                $('#value').typeahead({
+                    ajax: '{{ route('config.values', $config) }}',
+                    valueField: 'key',
+                    displayField: 'display'
                 });
             });
         </script>
     @endpush
 @endif
+
+@push('scripts')
+    <script>
+        $('select').selectpicker();
+    </script>
+@endpush

@@ -12,3 +12,10 @@ if (!function_exists('variable')) {
 		return \App\Classes\VariableHandler::manifest($data);
 	}
 }
+
+if (!function_exists('homeBreadcrumb')) {
+	function homeBreadcrumb()
+	{
+		return new \App\Classes\Breadcrumb('Home', 'home');
+	}
+}
