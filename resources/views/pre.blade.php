@@ -1,3 +1,5 @@
 @extends('layout.app')
 
-@include('generics.pre', ['code' => $code, 'title' => $title ?? ''])
+@section('content')
+    @include('generics.pre', ['code' => $code, 'title' => $title ?? ''])
+@endsection

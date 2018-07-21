@@ -59,14 +59,10 @@ class ConstantController extends Controller
 
 	public function create(Config $config, FieldList $fieldList = null, Breadcrumb $breadcrumb, $form)
 	{
-		return view('generics.form', [
-			'title'       => 'Constant Form',
-			'form'        => $form,
-			'submit_text' => 'Submit',
-			'config'      => $config,
-			'fieldList'   => $fieldList,
-			'breadcrumb'  => $breadcrumb,
-		]);
+		$title = 'Constant Form';
+		$submit_text = 'Create Form';
+
+		return view('generics.form', compact([$title, $form, $submit_text, $config, $fieldList, $breadcrumb]));
 	}
 
 	public function configStore(Request $request, Config $config)
@@ -87,7 +83,7 @@ class ConstantController extends Controller
 	{
 		$const = Constant::make();
 
-		$const->fill($request->only(['key', 'list', 'value', 'active']) + ['active' => 0, 'required' => 0]);
+		$const->fill($request->all() + ['active' => 0, 'required' => 0]);
 
 		$const->owner()->associate($owner);
 
@@ -98,18 +94,25 @@ class ConstantController extends Controller
 
 	public function edit(FormBuilder $formBuilder, Constant $constant)
 	{
+		$title = 'Update constant form';
+		$submit_text = 'Update constant';
+
+
 		$form = $formBuilder->create('App\Forms\ConstantForm', [
 			'method' => 'PATCH',
 			'route'  => ['constant.update', $constant],
 			'model'  => $constant,
 		]);
 
-		return view('generics.form', [
-			'breadcrumb'  => $constant->owner->showBreadcrumb()->addCurrent("Editing constant {$constant->name}"),
-			'title'       => 'Update constant form',
-			'form'        => $form,
-			'submit_text' => 'Update form',
-		]);
+		if ($constant->owner_type == 'App\\Config') {
+			$config = $constant->owner;
+		} else {
+			$config = null;
+		}
+
+		$breadcrumb = $constant->owner->showBreadcrumb()->addCurrent("Editing constant {$constant->name}");
+
+		return view('generics.form', compact([$breadcrumb, $title, $config, $form, $submit_text]));
 	}
 
 	public function update(Request $request, Constant $constant)
@@ -142,6 +145,7 @@ class ConstantController extends Controller
 		$constant->save();
 
 		flash()->success("Constant {$constant->key} was activated!");
+
 		return redirect()->back();
 	}
 
