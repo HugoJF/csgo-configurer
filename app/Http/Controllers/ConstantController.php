@@ -62,7 +62,7 @@ class ConstantController extends Controller
 		$title = 'Constant Form';
 		$submit_text = 'Create Form';
 
-		return view('generics.form', compact([$title, $form, $submit_text, $config, $fieldList, $breadcrumb]));
+		return view('generics.form', compact('title', 'form', 'submit_text', 'config', 'fieldList', 'breadcrumb'));
 	}
 
 	public function configStore(Request $request, Config $config)
@@ -112,7 +112,7 @@ class ConstantController extends Controller
 
 		$breadcrumb = $constant->owner->showBreadcrumb()->addCurrent("Editing constant {$constant->name}");
 
-		return view('generics.form', compact([$breadcrumb, $title, $config, $form, $submit_text]));
+		return view('generics.form', compact('breadcrumb', 'title', 'config', 'form', 'submit_text'));
 	}
 
 	public function update(Request $request, Constant $constant)

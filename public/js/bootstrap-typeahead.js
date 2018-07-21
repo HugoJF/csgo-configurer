@@ -31,11 +31,14 @@
         that.options = $.extend({}, $.fn.typeahead.defaults, options);
         that.$menu = $(that.options.menu).insertAfter(that.$element);
 
+        console.log(that.options);
+
         // Method overrides
         that.eventSupported = that.options.eventSupported || that.eventSupported;
         that.grepper = that.options.grepper || that.grepper;
         that.highlighter = that.options.highlighter || that.highlighter;
         that.lookup = that.options.lookup || that.lookup;
+        that.ajaxLookup = that.options.ajaxLookup || that.ajaxLookup;
         that.matcher = that.options.matcher || that.matcher;
         that.render = that.options.render || that.render;
         that.onSelect = that.options.onSelect || null;
@@ -99,9 +102,6 @@
                 var value = $selectedItem.attr('data-value');
                 var text = this.$menu.find('.active a').text();
 
-
-                value = this.$element.val().replace(/{[a-zA-Z0-9.-_% ]*}?$/, value);
-
                 this.$element
                     .val(this.updater(value))
                     .change();
@@ -153,17 +153,7 @@
             }
 
             // Query changed
-            this.query = query.match(/{[a-zA-Z0-9.-_% ]*}?$/);
-
-            // Check if match found something
-            if(this.query == null) {
-                return this;
-            }
-
-            // Get first match (should be unique)
-            this.query = this.query[0];
-
-            console.log("Matching " + this.query + " from " + this.$element.val());
+            this.query = query;
 
             // Cancel last timer if set
             if (this.ajax.timerId) {
