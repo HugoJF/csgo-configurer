@@ -18,7 +18,7 @@ class CreateListsTable extends Migration
 
 			$table->boolean('active');
 
-			$table->string('key');
+			$table->string('key')->nullable();
 			$table->boolean('overwrites')->default(false);
 
 			$table->unsignedInteger('field_list_id')->nullable();

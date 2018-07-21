@@ -127,7 +127,7 @@ class Server extends Model
 			// Process lists
 			$finalConfig = $this->customMerge($finalConfig, $this->processLists($config->lists));
 		}
-		
+
 		$translator = new CompoundVariableTranslator($finalConfig);
 		$translator->setModeException()->translate();
 
@@ -136,7 +136,6 @@ class Server extends Model
 			'config'    => $finalConfig,
 		];
 	}
-
 
 
 	private function processLists(Collection $lists)
@@ -156,9 +155,16 @@ class Server extends Model
 	{
 		$parentKey = $list->fieldList->key;
 
-		$a[ $parentKey ][ $list->key ] = $this->remapConstants($list);
-		$a[ $parentKey ][ $list->key ]['_replace'] = $list->overwrites ? 'true' : 'false';
-		$a[ $parentKey ][ $list->key ] = $this->customMerge($a[ $list->fieldList->key ][ $list->key ], $this->processLists($list->lists));
+		// This is used to skip using the List key
+		if ($list->key) {
+			$a[ $parentKey ][ $list->key ] = $this->remapConstants($list);
+			$a[ $parentKey ][ $list->key ]['_replace'] = $list->overwrites ? 'true' : 'false';
+			$a[ $parentKey ][ $list->key ] = $this->customMerge($a[ $list->fieldList->key ][ $list->key ], $this->processLists($list->lists));
+		} else {
+			$a[ $parentKey ] = $this->remapConstants($list);
+			$a[ $parentKey ]['_replace'] = $list->overwrites ? 'true' : 'false';
+			$a[ $parentKey ] = $this->customMerge($a[ $list->fieldList->key ], $this->processLists($list->lists));
+		}
 	}
 
 	private function remapConstants(List_ $list)
@@ -208,6 +214,7 @@ class Server extends Model
 				}
 			}
 		}
+
 		return $a;
 	}
 

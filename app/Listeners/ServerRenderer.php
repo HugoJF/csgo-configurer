@@ -115,7 +115,7 @@ class ServerRenderer implements ShouldQueue
 
 		$rawContent = Storage::disk('plugins')->get($file->path);
 
-		if ($file->renderable) {
+		if ($file->type == File::TYPE_RENDERABLE) {
 			$content = view(['template' => $rawContent,], $server->renderConfig())->render();
 		} else {
 			$content = $rawContent;
