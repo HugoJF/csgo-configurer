@@ -59,7 +59,7 @@ class FieldListController extends Controller
 			'route'  => ['field-list.update', $fieldList],
 			'model'  => $fieldList,
 		], [
-			'files' => $fieldList->owner->files()->where('renderable', true)->get(),
+			'files' => $fieldList->owner->files()->where('type', File::TYPE_RENDERABLE)->get(),
 		]);
 
 		return view('generics.form', [
