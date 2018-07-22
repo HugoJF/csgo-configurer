@@ -38,7 +38,9 @@ class ConfigValueParser
 	private function parseList(List_ $list, $prefix = '')
 	{
 		$prefix = $this->mergePrefix($prefix, $list->fieldList->key);
-		$prefix = $this->mergePrefix($prefix, $list->key);
+		if($list->key) {
+			$prefix = $this->mergePrefix($prefix, $list->key);
+		}
 
 		$this->parseConstants($list->constants, $prefix);
 		$this->parseLists($list->lists, $prefix);

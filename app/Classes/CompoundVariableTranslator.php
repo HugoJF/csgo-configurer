@@ -58,8 +58,7 @@ class CompoundVariableTranslator
 	public function translatePass()
 	{
 		foreach ($this->config as $key => $item) {
-			$this->resetLoopCheck();
-			$this->translateItem($key, $item);
+			$this->translateItem($this->config, $key);
 		}
 	}
 
@@ -77,10 +76,21 @@ class CompoundVariableTranslator
 		}
 	}
 
-	public function translateItem($key, $item)
+	public function translateItem(&$base, $key)
 	{
-		if (($templateCount = $this->needsTranslation($item, $matches))) {
-			$this->config[ $key ] = $this->replaceTemplates($item, $templateCount, $matches);
+		$this->resetLoopCheck();
+
+		if (!is_array($base[$key]) && $templateCount = $this->needsTranslation($base[$key], $matches)) {
+			$base[ $key ] = $this->replaceTemplates($base[$key], $templateCount, $matches);
+		} else if (is_array($base[$key])) {
+			$this->translateList($base[$key]);
+		}
+	}
+
+	private function translateList(&$item)
+	{
+		foreach ($item as $k => $i) {
+			$this->translateItem($item, $k);
 		}
 	}
 
@@ -97,9 +107,6 @@ class CompoundVariableTranslator
 
 	private function needsTranslation($value, &$match)
 	{
-		if (is_array($value))
-			return false;
-
 		$count = preg_match_all('/{%\s*([a-zA-Z0-9.-_]+)\s*%}/', $value, $match);
 
 		return $count;
