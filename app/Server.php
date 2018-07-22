@@ -127,7 +127,7 @@ class Server extends Model
 		}
 
 		$translator = new CompoundVariableTranslator($finalConfig);
-		$translator->setModeException()->translate();
+		$translator->setModeNoReplace()->translate();
 
 		return [
 			'constants' => $constants,

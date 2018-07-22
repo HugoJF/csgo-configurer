@@ -135,7 +135,6 @@ class CompoundVariableTranslator
 			if (array_key_exists($piece, $value)) {
 				$value = $value[ $piece ];
 			} else {
-				dd($this->config);
 				switch ($this->mode) {
 					default:
 					case static::MODE_EXCEPTION:
