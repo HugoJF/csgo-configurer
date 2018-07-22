@@ -110,6 +110,7 @@ class Server extends Model
 	{
 		$configs = $this->getConfigs();
 
+
 		$finalConfig = [];
 		$constants = [];
 
