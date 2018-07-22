@@ -48,15 +48,6 @@ class AuthController extends Controller
 	 */
 	public function login()
 	{
-		$user = $this->findOrNewUser([
-			'personaname'  => 'de_nerd',
-			'avatarfull'    => 'lil',
-			'steamID64' => 72572752752,
-		]);
-
-		Auth::login(User::first());
-
-		return redirect('home');
 		if ($this->steam->validate()) {
 			$info = $this->steam->getUserInfo();
 			if (!is_null($info)) {
@@ -82,16 +73,15 @@ class AuthController extends Controller
 	 */
 	protected function findOrNewUser($info)
 	{
-		$user = User::where('steamid', $info['steamID64'])->first();
+		$user = User::where('steamid', $info->steamID64)->first();
 		if (!is_null($user)) {
 			return $user;
 		}
 		$user = User::make([
-			'username' => $info['personaname'],
-			'avatar'   => $info['avatarfull'],
+			'username' => $info->personaname,
+			'avatar'   => $info->avatarfull,
 		]);
-
-		$user->steamid = $info['steamID64'];
+		$user->steamid = $info->steamID64;
 		$user->save();
 
 		return $user;

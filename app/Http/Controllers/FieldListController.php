@@ -111,6 +111,10 @@ class FieldListController extends Controller
 			$fieldList->file()->associate(File::find($request->input('file_id')));
 		}
 
+		if($request->get('renderable')) {
+			$fieldList->type = File::TYPE_RENDERABLE;
+		}
+
 		$fieldList->save();
 
 		flash()->success('Field list was updated!');

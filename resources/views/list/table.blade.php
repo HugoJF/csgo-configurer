@@ -1,8 +1,8 @@
 @forelse($lists as $key => $list)
     <div class="well">
         <div class="page-header">
-            <h2>{{ $prefix ?? '' }}{{ $list->key }}
-                <small><a href="{{ $list->fieldList->routeShow() }}">{{ $list->fieldList->name }}</a> - {{ $list->fieldList->description }}</small>
+            <h2>{{ $prefix ?? '' }}{{ $list->fieldList->name }}
+                <small><a href="{{ $list->fieldList->routeShow() }}">{{ $list->key }}</a> - {{ $list->fieldList->description }}</small>
             </h2>
         </div>
         <a class="btn btn-sm btn-primary" href="{{ route('list.edit', $list) }}">
@@ -34,7 +34,7 @@
             <h3>Sub field-lists</h3>
             @include('field_list.add_list_table', ['fieldLists' => $list->fieldList->fieldLists, 'owner' => $list])
             <h3>Lists</h3>
-            @include('list.table', ['lists' => $list->lists, 'prefix' => ($prefix ?? '' ) . $list->key . ' 🠢 '])
+            @include('list.table', ['lists' => $list->lists, 'prefix' => ($prefix ?? '' ) . $list->fieldList->name . ' 🠢 '])
         @endif
     </div>
 

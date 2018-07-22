@@ -9,7 +9,10 @@
 namespace App\Classes;
 
 
+use App\Field;
+use App\FieldList;
 use App\Plugin;
+use Illuminate\Support\Collection;
 
 class PluginFieldParser
 {
@@ -24,14 +27,33 @@ class PluginFieldParser
 
 	public function parse()
 	{
-		$this->result = $this->plugin->fields->transform(function ($item) {
-			$item['display'] = $item['key'] . ' - ' . $item['description'];
-
-			return $item;
-		});
+		$this->parsePlugin($this->plugin);
 
 		return $this;
 	}
+
+	public function parsePlugin(Plugin $plugin)
+	{
+		$this->parseFields($plugin->fields);
+		$this->parseFieldLists($plugin->fieldLists);
+	}
+
+	public function parseFields(Collection $fields)
+	{
+		$fields->each(function ($field) {
+			$piece['display'] = $field['key'] . ' - ' . $field['description'];
+			$piece['key'] = $field['key'];
+			$this->result[] = $piece;
+		});
+	}
+
+	public function parseFieldLists(Collection $fieldLists)
+	{
+		$fieldLists->each(function (FieldList $fieldList) {
+			$this->parseFields($fieldList->fields);
+		});
+	}
+
 
 	public function result()
 	{

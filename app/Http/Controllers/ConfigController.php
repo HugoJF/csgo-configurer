@@ -42,6 +42,7 @@ class ConfigController extends Controller
 		$config = Config::make();
 
 		$config->fill(Input::all());
+		$config->slug = str_slug(Input::get('name'));
 
 		if ($type == 'user' || $type == null) {
 			$owner = Auth::user();
