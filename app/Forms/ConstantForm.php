@@ -56,7 +56,7 @@ class ConstantForm extends Form
 				'checked' => true,
 			];
 		}
-		$opts = $opts + [
+		$opts = ($opts ?? []) + [
 				'label'      => 'Active',
 				'rules'      => ['required'],
 				'help_block' => [
