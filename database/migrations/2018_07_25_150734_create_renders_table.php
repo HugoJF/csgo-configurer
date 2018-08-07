@@ -16,7 +16,7 @@ class CreateRendersTable extends Migration
         Schema::create('renders', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->json('logs');
+            $table->text('logs');
             $table->unsignedInteger('duration');
 
             $table->unsignedInteger('server_id');
