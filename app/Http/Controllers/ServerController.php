@@ -48,9 +48,27 @@ class ServerController extends Controller
 	public function renderConfig(Server $server)
 	{
 		return view('pre', [
-			'title'     => "{$server->name} - Rendering Config",
-			'code'   => json_encode($server->renderConfig()),
+			'title'      => "{$server->name} - Rendering Config",
+			'code'       => json_encode($server->renderConfig()),
 			'breadcrumb' => $server->showBreadcrumb()->addCurrent('Rendering config'),
+		]);
+	}
+
+	public function previewFile(Server $server, File $file)
+	{
+		$rawContent = Storage::disk('plugins')->get($file->path);
+
+		if ($file->type == File::TYPE_RENDERABLE) {
+			$content = view(['template' => $rawContent,], $server->renderConfig())->render();
+		} else {
+			$content = $rawContent;
+		}
+
+		return view('pre', [
+			'title'      => "File Preview: {$file->path}",
+			'code'       => $content,
+			'encode'     => false,
+			'breadcrumb' => $server->showBreadcrumb()->addCurrent('File preview'),
 		]);
 	}
 

@@ -43,6 +43,10 @@ class File extends Model
 		return $query->where('type', File::TYPE_RENDER);
 	}
 
+	public function scopeRenderable(Builder $query)
+	{
+		return $query->where('type', File::TYPE_RENDERABLE);
+	}
 
 	public function owner()
 	{

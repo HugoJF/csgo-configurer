@@ -49,6 +49,7 @@ class PluginController extends Controller
 		$plugin = Plugin::make();
 
 		$plugin->fill($request->all());
+		$plugin->slug = str_slug($request->get('name'));
 
 		$plugin->save();
 

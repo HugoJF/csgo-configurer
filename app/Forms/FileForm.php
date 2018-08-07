@@ -13,6 +13,11 @@ class FileForm extends Form
 
 	private function type()
 	{
-		$this->add('type', 'text');
+		$this->add('type', 'text', [
+			'label'      => 'File Type',
+			'help_block' => [
+				'text' => 'Used by the system to identify what kinda of file this is.',
+			],
+		]);
 	}
 }

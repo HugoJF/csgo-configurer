@@ -51,12 +51,17 @@ Route::prefix('servers')->name('server.')->group(function () {
 	Route::get('{server}/sync', 'ServerController@sync')->name('sync');
 	Route::get('{server}', 'ServerController@show')->name('show');
 	Route::get('{server}/render-config', 'ServerController@renderConfig')->name('render-config');
+	Route::get('{server}/preview-file/{file}', 'ServerController@previewFile')->name('preview-file');
 
 	Route::post('/', 'ServerController@store')->name('store');
 
 	Route::patch('{server}', 'ServerController@update')->name('update');
 
 	Route::delete('{server}', 'ServerController@delete')->name('delete');
+});
+
+Route::prefix('renders')->name('render.')->group(function () {
+	Route::get('{render}', 'RenderController@show')->name('show');
 });
 
 Route::prefix('constant')->name('constant.')->group(function () {
@@ -200,3 +205,20 @@ Route::get('plugins/{plugin}/manifest', function (\App\Plugin $plugin) {
 
 	return $plugin;
 })->name('plugin.manifest');
+
+
+Route::get('smartlog', function () {
+	$log = new \App\Classes\SmartLog();
+
+	$log->addMeasure('Hey');
+	sleep(0.5);
+	$log->addMeasure('Bye');
+
+	$serialized = json_encode($log);
+
+	$log2 = new \App\Classes\SmartLog();
+	$log2->jsonDeserialize($serialized);
+
+
+	return $log2->render();
+});

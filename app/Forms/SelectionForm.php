@@ -26,8 +26,12 @@ class SelectionForm extends Form
 		}
 
 		$this->add('installation_id', 'select', [
+			'label'       => 'Installation',
 			'choices'     => $installations,
 			'empty_value' => '=== Installation ===',
+			'help_block'  => [
+				'text' => 'The installation referenced in this selected.',
+			],
 		]);
 	}
 
@@ -40,8 +44,12 @@ class SelectionForm extends Form
 		}
 
 		$this->add('config_id', 'select', [
+			'label'       => 'Config',
 			'choices'     => $configs,
 			'empty_value' => '=== Config ===',
+			'help_block'  => [
+				'text' => 'The config selection for selected installation.',
+			],
 		]);
 	}
 
@@ -54,13 +62,23 @@ class SelectionForm extends Form
 		}
 
 		$this->add('plugin_id', 'select', [
+			'label'       => 'Plugin',
 			'choices'     => $plugins,
 			'empty_value' => '=== Plugin ===',
+			'help_block'  => [
+				'text' => 'The plugin referenced in this selection.',
+			],
 		]);
 	}
 
 	private function priority()
 	{
-		$this->add('priority', 'number');
+		$this->add('priority', 'number', [
+			'label'      => 'Priority',
+			'rules'      => ['required'],
+			'help_block' => [
+				'text' => 'The priority for the selected config.',
+			],
+		]);
 	}
 }

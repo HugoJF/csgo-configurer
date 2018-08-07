@@ -43,9 +43,6 @@
     </p>
     @include('config.table', ['configs' => $server->configs])
     
-    <h2>Server variables</h2>
-    @include('constant.table', ['constants' => $server->getConstants()['constants']])
-
     <h2>Server render config order</h2>
     <p>
         <a href="{{ route('config.create', ['server', $server]) }}" id="generate" type="submit" name="generate" class="btn btn-default">
@@ -54,6 +51,12 @@
     </p>
     @include('config.table', ['configs' => $server->getConfigs()])
 
+    <h2>Server installation files preview</h2>
+    @include('file.preview_table', ['server' => $server])
+    
+    <h2>Server renders</h2>
+    @include('render.table', ['renders' => $server->renders])
+    
     <h2>Server rendered files</h2>
     @include('file.table', ['files' => $server->files()->rendered()->get()])
     

@@ -2,9 +2,11 @@
 
 namespace App\Listeners;
 
+use App\Classes\SmartLog;
 use App\Events\GenericBroadcastEvent;
 use App\Events\ServerRenderRequest;
 use App\File;
+use App\Render;
 use App\Server;
 use Carbon\Carbon;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,6 +17,7 @@ class ServerRenderer implements ShouldQueue
 {
 	use InteractsWithQueue;
 
+	private $logs;
 	/**
 	 * Create the event listener.
 	 *
@@ -22,7 +25,7 @@ class ServerRenderer implements ShouldQueue
 	 */
 	public function __construct()
 	{
-		//
+		$this->logs = new SmartLog();
 	}
 
 	private $user;
@@ -36,18 +39,24 @@ class ServerRenderer implements ShouldQueue
 	 */
 	public function handle(ServerRenderRequest $event)
 	{
+		$startTime = round(microtime(true) * 1000);
+
 		event(new GenericBroadcastEvent("Server rendering started!", "Server <code>{$event->server->name}</code> started template rendering!"));
 
 		$this->user = $event->user;
 
 		$server = $event->server;
 
+		$this->logs->addMeasure('Preparing file list');
 		$files = $this->prepareFileList($server);
 
+		$this->logs->addMeasure('Preparing render directory');
 		$this->prepareDirectory($server->id);
 
+		$this->logs->addMeasure('Erasing server files');
 		$this->eraseServerFiles($server);
 
+		$this->logs->addMeasure('Rendering files');
 		$this->renderFiles($server, $files);
 
 		$server->rendered_at = Carbon::now();
@@ -55,6 +64,18 @@ class ServerRenderer implements ShouldQueue
 		$server->save();
 
 		event(new GenericBroadcastEvent("Server rendering finished!", "Server <code>{$event->server->name}</code> finished template rendering successfully!"));
+		$this->logs->addMeasure('Finishing');
+
+		$endTime = round(microtime(true) * 1000);
+		$duration = $endTime - $startTime;
+
+		$render = Render::make();
+
+		$render->duration = $duration;
+		$render->logs = $this->logs;
+		$render->server()->associate($event->server);
+
+		$render->save();
 	}
 
 	private function prepareFileList(Server $server)
@@ -117,6 +138,7 @@ class ServerRenderer implements ShouldQueue
 
 		if ($file->type == File::TYPE_RENDERABLE) {
 			$content = view(['template' => $rawContent,], $server->renderConfig())->render();
+			$content = html_entity_decode($content);
 		} else {
 			$content = $rawContent;
 		}

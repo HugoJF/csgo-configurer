@@ -1,5 +1,5 @@
 <h1>{{ $title ?? ''}}</h1>
-<pre class="prettyprint linenums">{{ json_encode($code) }}</pre>
+<pre class="prettyprint linenums">{{( $encode ?? true) ? json_encode($code) : $code }}</pre>
 
 @push('scripts')
     <script>

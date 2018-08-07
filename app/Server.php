@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Classes\CompoundVariableTranslator;
+use App\Classes\SmartLog;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
@@ -11,6 +12,9 @@ class Server extends Model
 {
 	use RoutesActions;
 
+	/*********************
+	 * LARAVEL OVERRIDES *
+	 *********************/
 	protected $fillable = [
 		'name', 'ip', 'port', 'password', 'ftp_user', 'ftp_password', 'ftp_host', 'ftp_root',
 	];
@@ -20,6 +24,7 @@ class Server extends Model
 	];
 
 	protected $routeNamePrefix = 'server.';
+
 
 	public static function indexBreadcrumb()
 	{
@@ -52,9 +57,23 @@ class Server extends Model
 		return $this->morphMany('App\File', 'owner');
 	}
 
+	public function getRenderableInstallationFiles()
+	{
+		$plugins = $this->installation->plugins->pluck('id');
+
+		$files = File::whereIn('id', $plugins)->renderable()->get();
+
+		return $files;
+	}
+
 	public function user()
 	{
 		return $this->belongsTo('App\User');
+	}
+
+	public function renders()
+	{
+		return $this->hasMany('App\Render');
 	}
 
 	public function getPluginList()

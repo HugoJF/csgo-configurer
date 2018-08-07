@@ -27,6 +27,9 @@ class ConstantForm extends Form
 
 		$options['attr']['spellcheck'] = 'off';
 		$options['attr']['autocomplete'] = 'off';
+		$options['label'] = 'Key';
+		$options['rules'] = ['required'];
+		$options['help_block']['text'] = 'An identification for this constant.';
 
 		$this->add('key', 'text', $options ?? []);
 	}
@@ -34,20 +37,32 @@ class ConstantForm extends Form
 	private function value()
 	{
 		$this->add('value', 'text', [
-			'attr' => [
+			'label'      => 'Value',
+			'rules'      => ['required'],
+			'attr'       => [
 				'spellcheck'   => 'off',
 				'autocomplete' => 'off',
+			],
+			'help_block' => [
+				'text' => 'The actual value of the constant.',
 			],
 		]);
 	}
 
 	private function active()
 	{
-		if(!$this->getModel()) {
+		if (!$this->getModel()) {
 			$opts = [
 				'checked' => true,
 			];
 		}
+		$opts = $opts + [
+				'label'      => 'Active',
+				'rules'      => ['required'],
+				'help_block' => [
+					'text' => 'If this key-value constant is active to be used for plugin rendering.',
+				],
+			];
 		$this->add('active', 'checkbox', $opts ?? []);
 	}
 }

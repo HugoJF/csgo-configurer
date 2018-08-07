@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Classes\SmartLog;
 use App\Events\GenericBroadcastEvent;
 use App\Events\ServerSynchronizationRequest;
 use App\File;
@@ -21,7 +22,7 @@ class ServerSynchronizer implements ShouldQueue
 	private $destination_server;
 
 	private $forced;
-
+	private $log;
 	/**
 	 * Create the event listener.
 	 *
