@@ -20,7 +20,7 @@
             
             <td><a href="{{ $fieldList->parent->routeShow()  }}">{{ $fieldList->parent->name }}</a></td>
             <td style="white-space: nowrap;">
-                <a href="{{ route('list.create', [$owner, $fieldList]) }}" class="btn btn-xs btn-success">Instantiate</a>
+                <a href="{{ route('list.create', [$owner->data, $fieldList]) }}" class="btn btn-xs btn-success">Instantiate</a>
                 <a href="{{ route('field-list.edit', $fieldList) }}" class="btn btn-xs btn-primary">Edit</a>
                 {!! Form::open(['route' => ['field-list.delete', $fieldList], 'method' => 'DELETE', 'style' => 'display:inline']) !!}
                 <button class="btn btn-xs btn-danger">Delete</button>
