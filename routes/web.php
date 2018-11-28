@@ -110,7 +110,7 @@ Route::prefix('config')->name('config.')->group(function () {
 });
 
 Route::prefix('field-list')->name('field-list.')->group(function () {
-	Route::get('create/{field_list}', 'FieldListcontroller@create')->name('create');
+	Route::get('create/{field_list}', 'FieldListController@create')->name('create');
 	Route::post('{field_list}', 'FieldListController@store')->name('store');
 
 	Route::get('{field_list}', 'FieldListController@show')->name('show');
