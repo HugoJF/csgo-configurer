@@ -19,7 +19,7 @@
     @include('constant.table', ['constants' => $config->data->constants])
 
     <h2 id="field-lists">Field lists</h2>
-    @include('field_list.add_list_table', ['fieldLists' => $config->getFieldLists(), 'owner' => $config])
+    @include('field_list.add_list_table', ['fieldLists' => $config->getFieldLists(), 'owner' => $config->data])
     
     <h2 id="lists">Lists</h2>
     @include('list.table', ['lists' => $config->data->descendants()->with(['fieldList', 'fieldList.children', 'fieldList.children.fields', 'fieldList.children.parent',  'fieldList.fields', 'constants'])->get()->toTree()])
