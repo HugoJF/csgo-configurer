@@ -14,7 +14,6 @@ class ConfigObserver
      */
     public function deleted(Config $config)
     {
-    	$config->constants()->delete();
-    	$config->lists()->delete();
+    	$config->data()->delete();
     }
 }
