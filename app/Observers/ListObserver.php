@@ -15,6 +15,6 @@ class ListObserver
     public function deleted(List_ $list)
     {
     	$list->constants()->delete();
-    	$list->descendants()->delete();
+    	$list->children()->delete();
     }
 }
