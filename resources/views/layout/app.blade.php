@@ -74,7 +74,14 @@
             color: #e6e6e6;
             text-decoration: line-through;
         }
-        
+
+        /* ID anchors fixed navbar fix */
+        :target:before {
+            content:"";
+            display:block;
+            height:50px; /* fixed header height*/
+            margin:-50px 0 0; /* negative fixed header height */
+        }
     </style>
     
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
@@ -89,7 +96,7 @@
     <![endif]-->
 </head>
 
-<body>
+<body id="home" data-spy="scroll" data-offset="50" data-target="#myScrollspy">
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
@@ -182,6 +189,9 @@
             
             
             </div>
+        
+            @stack('sidebar')
+            
         </div>
         
         

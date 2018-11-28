@@ -35,6 +35,9 @@ class CreateServersTable extends Migration
 			$table->dateTime('sync_requested_at')->nullable();
 			$table->dateTime('synced_at')->nullable();
 
+			$table->integer('installation_id')->unsigned()->nullable();
+			$table->foreign('installation_id')->references('id')->on('installations')->onDelete('set null');
+
             $table->timestamps();
         });
     }

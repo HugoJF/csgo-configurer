@@ -32,6 +32,7 @@ class User extends Authenticatable
 	protected $hidden = [
 		'remember_token',
 	];
+
 	public static function indexBreadcrumb()
 	{
 		return homeBreadcrumb()->add([
@@ -47,6 +48,7 @@ class User extends Authenticatable
 			'route' => 'home',
 		]);
 	}
+
 	public function configs()
 	{
 		return $this->morphMany('App\Config', 'owner');

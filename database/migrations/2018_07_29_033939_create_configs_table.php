@@ -22,6 +22,9 @@ class CreateConfigsTable extends Migration
 
 			$table->string('slug')->unique();
 
+			$table->unsignedInteger('list_id');
+			$table->foreign('list_id')->references('id')->on('lists');
+
 			$table->integer('owner_id')->unsigned();
 			$table->string('owner_type');
 

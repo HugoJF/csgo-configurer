@@ -21,8 +21,8 @@ class CreateConstantsTable extends Migration
 			$table->string('key');
 			$table->text('value');
 
-			$table->unsignedInteger('owner_id');
-			$table->string('owner_type');
+			$table->unsignedInteger('list_id');
+			$table->foreign('list_id')->references('id')->on('lists');
 
 			$table->timestamps();
 		});

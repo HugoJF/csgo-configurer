@@ -36,9 +36,31 @@ class ServerController extends Controller
 		return redirect()->back();
 	}
 
+	public function syncAll()
+	{
+		foreach (Auth::user()->servers as $server) {
+			event(new ServerSynchronizationRequest(Auth::user(), $server));
+		}
+
+		flash()->success('Server Synchronization requested!');
+
+		return redirect()->back();
+	}
+
 	public function render(Server $server)
 	{
 		event(new ServerRenderRequest(Auth::user(), $server));
+
+		flash()->success('Server Rendering requested!');
+
+		return redirect()->back();
+	}
+
+	public function renderAll()
+	{
+		foreach(Auth::user()->servers as $server) {
+			event(new ServerRenderRequest(Auth::user(), $server));
+		}
 
 		flash()->success('Server Rendering requested!');
 

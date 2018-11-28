@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\FieldList;
 use App\File;
 use App\Server;
 use App\Plugin;
@@ -116,6 +117,12 @@ class FileController extends Controller
 			$plugin->folder = $p;
 
 			$plugin->modified_at = Carbon::now();
+
+			$fieldList = FieldList::create([
+				'name' => "Plugin {$plugin->name} data field list",
+			]);
+
+			$plugin->data()->associate($fieldList);
 
 			$plugin->save();
 		}

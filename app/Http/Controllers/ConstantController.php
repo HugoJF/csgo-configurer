@@ -13,31 +13,9 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class ConstantController extends Controller
 {
-	public function configCreate(FormBuilder $formBuilder, Config $config, FieldList $fieldList = null)
-	{
-		$breadcrumb = $config->showBreadcrumb()->addCurrent('Creating new constant');
-
-		if ($fieldList) {
-			$fields = $fieldList->fields->pluck('key')->toArray();
-		} else {
-			$fields = [];
-		}
-
-		$form = $formBuilder->create('App\Forms\ConstantForm', [
-			'method' => 'POST',
-			'url'    => route('constant.config.store', [$config, 'fields' => $fields]),
-		], [
-			'customFields' => $fieldList ? $fieldList->fields : [],
-			'list'         => $fieldList ? $fieldList->name : null,
-		]);
-
-		return $this->create($config, $fieldList, $breadcrumb, $form);
-	}
-
-	public function listCreate(FormBuilder $formBuilder, List_ $list, FieldList $fieldList = null)
+	public function create(List_ $list, FieldList $fieldList = null, FormBuilder $formBuilder)
 	{
 		$breadcrumb = $list->showBreadcrumb()->addCurrent('Creating new constant');
-		$config = $list->getConfig();
 
 		if ($fieldList) {
 			$fields = $fieldList->fields->pluck('key')->toArray();
@@ -47,49 +25,31 @@ class ConstantController extends Controller
 
 		$form = $formBuilder->create('App\Forms\ConstantForm', [
 			'method' => 'POST',
-			'url'    => route('constant.list.store', [$list, 'fields' => $fields]),
+			'url'    => route('constant.store', [$list, 'fields' => $fields]),
 		], [
 			'customFields' => $fieldList ? $fieldList->fields : [],
 			'list'         => $fieldList ? $fieldList->name : null,
 		]);
 
-
-		return $this->create($config, $fieldList, $breadcrumb, $form);
-	}
-
-	public function create(Config $config, FieldList $fieldList = null, Breadcrumb $breadcrumb, $form)
-	{
 		$title = 'Constant Form';
 		$submit_text = 'Create Form';
 
-		return view('generics.form', compact('title', 'form', 'submit_text', 'config', 'fieldList', 'breadcrumb'));
+		$config = List_::descendantsAndSelf($list)->where('parent_id', null)->first()->config;
+
+		return view('generics.form', compact('title', 'config', 'form', 'submit_text', 'fieldList', 'breadcrumb'));
 	}
 
-	public function configStore(Request $request, Config $config)
-	{
-		$route = route('config.show', $config);
-
-		return $this->store($request, $config, $route);
-	}
-
-	public function listStore(Request $request, List_ $list)
-	{
-		$route = route('config.show', $list->getConfig());
-
-		return $this->store($request, $list, $route);
-	}
-
-	public function store(Request $request, $owner, $route)
+	public function store(Request $request, List_ $list)
 	{
 		$const = Constant::make();
 
 		$const->fill($request->all() + ['active' => 0, 'required' => 0]);
 
-		$const->owner()->associate($owner);
+		$const->list_()->associate($list);
 
 		$const->save();
 
-		return redirect($route);
+		return redirect()->route('list.show', $list);
 	}
 
 	public function edit(FormBuilder $formBuilder, Constant $constant)

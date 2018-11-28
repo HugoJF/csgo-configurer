@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Config;
+use App\List_;
 use App\Server;
 use App\Plugin;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -51,12 +53,19 @@ class ConfigController extends Controller
 		} else if ($type == 'plugin') {
 			$owner = Plugin::where('slug', $id)->first();
 		} else {
-			$owner = null;
+			throw new \Exception("Invalid owner type $type");
 		}
 
+		$list = List_::create([
+			'name'   => "Config {$config->slug} data list",
+			'active' => true,
+		]);
+
 		$config->owner()->associate($owner);
+		$config->data()->associate($list);
 
 		$config->save();
+
 
 		return redirect()->route('config.show', $config);
 	}
@@ -82,8 +91,6 @@ class ConfigController extends Controller
 
 	public function show(Config $config)
 	{
-		$config->load('constants');
-
 		return view('config.show', [
 			'config'     => $config,
 			'breadcrumb' => $config->showBreadcrumb(),
@@ -92,11 +99,20 @@ class ConfigController extends Controller
 
 	public function edit(FormBuilder $formBuilder, Config $config)
 	{
+		$users = User::all();
+		$plugins = Plugin::all();
+		$servers = Server::all();
+
 		$form = $formBuilder->create('App\Forms\ConfigForm', [
 			'method' => 'PATCH',
 			'url'    => route('config.update', $config),
 			'model'  => $config,
+		], [
+			'users'   => $users,
+			'plugins' => $plugins,
+			'servers' => $servers,
 		]);
+
 
 		return view('generics.form', [
 			'title'       => 'Config Update Form',
@@ -109,6 +125,21 @@ class ConfigController extends Controller
 	public function update(Request $request, Config $config)
 	{
 		$config->fill($request->all());
+
+		if($request->input('new_owner')) {
+			try {
+				$owner = explode('|', $request->get('new_owner'));
+
+				$newOwner = call_user_func([$owner[0], 'findOrFail'], $owner[1]);
+
+				$config->owner()->associate($newOwner);
+
+				flash()->success('Config owner overwritten successfully!');
+			} catch (\Exception $e) {
+				// TODO: report to Sentry but continue without breaking
+				flash()->error('Failed to overwrite config owner!');
+			}
+		}
 
 		$config->save();
 

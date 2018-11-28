@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\PluginsSynchronizationRequest;
+use App\FieldList;
 use App\Plugin;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Input;
@@ -50,6 +51,12 @@ class PluginController extends Controller
 
 		$plugin->fill($request->all());
 		$plugin->slug = str_slug($request->get('name'));
+
+		$fieldList = FieldList::create([
+			'name' => "Plugin {$plugin->name} data field list",
+		]);
+
+		$plugin->data()->associate($fieldList);
 
 		$plugin->save();
 

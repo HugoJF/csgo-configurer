@@ -8,15 +8,20 @@ class ListForm extends Form
 {
 	public function buildForm()
 	{
+		$this->name();
 		$this->key();
 		$this->customFields();
 		$this->overwrites();
 		$this->active();
 	}
 
+	private function name()
+	{
+		$this->add('name', 'text');
+	}
+
 	private function key()
 	{
-
 		$this->add('key', 'text', [
 			'label'      => 'Key',
 			'help_block' => [
@@ -46,14 +51,16 @@ class ListForm extends Form
 			$opts = [
 				'checked' => true,
 			];
+		} else {
+			$opts = [];
 		}
 
 		$opts = $opts + [
-				'label' => 'Active',
-				'rules' => ['required'],
+				'label'      => 'Active',
+				'rules'      => ['required'],
 				'help_block' => [
-					'text' => 'If this list is active to be used for plugin rendering.'
-				]
+					'text' => 'If this list is active to be used for plugin rendering.',
+				],
 			];
 
 		$this->add('active', 'checkbox', $opts ?? []);

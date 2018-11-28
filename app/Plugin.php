@@ -64,13 +64,8 @@ class Plugin extends Model
 		return $this->belongsToMany('App\Installation')->withPivot(['config_id', 'priority'])->using('App\InstallationPlugin');
 	}
 
-	public function fieldLists()
+	public function data()
 	{
-		return $this->morphMany('App\FieldList', 'owner');
-	}
-
-	public function fields()
-	{
-		return $this->morphMany('App\Field', 'owner');
+		return $this->belongsTo('App\FieldList', 'field_list_id');
 	}
 }

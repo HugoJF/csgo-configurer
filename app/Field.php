@@ -22,8 +22,8 @@ class Field extends Model
 		]);
 	}
 
-	public function owner()
+	public function fieldList()
 	{
-		return $this->morphTo('owner');
+		return $this->belongsTo('App\FieldList');
 	}
 }

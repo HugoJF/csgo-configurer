@@ -53,14 +53,9 @@ class Config extends Model
 		return $this->morphTo();
 	}
 
-	public function constants()
+	public function data()
 	{
-		return $this->morphMany('App\Constant', 'owner');
-	}
-
-	public function lists()
-	{
-		return $this->morphMany('App\List_', 'owner');
+		return $this->belongsTo('App\List_', 'list_id');
 	}
 
 	public function selections()
@@ -68,7 +63,7 @@ class Config extends Model
 		return $this->hasMany('App\InstallationConfig', 'config_id');
 	}
 
-	public function fieldLists()
+	public function getFieldLists()
 	{
 		if ($this->owner_type == 'App\User') {
 			return $this->fieldListsFromUser($this->owner);
@@ -84,10 +79,11 @@ class Config extends Model
 	public function fieldListsFromUser($user)
 	{
 		$serverFieldLists = [];
+
 		foreach ($user->servers as $server) {
 			if ($server->installation) {
 				foreach ($server->installation->plugins as $plugin) {
-					foreach ($plugin->fieldLists as $fl) {
+					foreach ($plugin->data->children->toFlatTree() as $fl) {
 						$serverFieldLists[] = $fl;
 					}
 				}
@@ -102,7 +98,7 @@ class Config extends Model
 		$serverFieldLists = [];
 		if ($server->installation) {
 			foreach ($server->installation->plugins as $plugin) {
-				foreach ($plugin->fieldLists as $fl) {
+				foreach ($plugin->data->children->toFlatTree() as $fl) {
 					$serverFieldLists[] = $fl;
 				}
 			}
@@ -113,6 +109,6 @@ class Config extends Model
 
 	public function fieldListsFromPlugin($plugin)
 	{
-		return $plugin->fieldLists;
+		return $plugin->data->children->toFlatTree();
 	}
 }

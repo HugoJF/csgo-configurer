@@ -10,6 +10,7 @@
         "fideloper/proxy": "^4.0",
         "imtigger/laravel-settings-ui": "dev-master",
         "invisnik/laravel-steam-auth": "3.*",
+        "kalnoy/nestedset": "^4.2@dev",
         "kris/laravel-form-builder": "^1.14",
         "laracasts/flash": "^3.0",
         "laravel/framework": "5.6.*",

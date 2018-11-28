@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRendersTable extends Migration
+class CreateSynchronizationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,16 @@ class CreateRendersTable extends Migration
      */
     public function up()
     {
-        Schema::create('renders', function (Blueprint $table) {
+        Schema::create('synchronizations', function (Blueprint $table) {
             $table->increments('id');
 
-            $table->text('logs');
-            $table->unsignedInteger('duration');
+			$table->text('logs');
+			$table->unsignedInteger('duration');
 
-            $table->unsignedInteger('server_id');
-            $table->foreign('server_id')->references('id')->on('servers')->onDelete('cascade');
+			$table->unsignedInteger('server_id');
+			$table->foreign('server_id')->references('id')->on('servers')->onDelete('cascade');
 
-            $table->timestamps();
+			$table->timestamps();
         });
     }
 
@@ -33,6 +33,6 @@ class CreateRendersTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('renders');
+        Schema::dropIfExists('synchronizations');
     }
 }

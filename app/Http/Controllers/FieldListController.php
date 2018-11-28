@@ -13,37 +13,24 @@ class FieldListController extends Controller
 {
 	public function show(FieldList $fieldList)
 	{
-		return redirect($fieldList->owner->routeShow());
+		session()->reflash();
+
+		if($fieldList->isRoot()) {
+			return redirect($fieldList->plugin->routeShow());
+		}
+
+		return redirect($fieldList->parent->routeShow());
 	}
 
-	public function fieldListCreate(FormBuilder $formBuilder, FieldList $fieldList)
+	public function create(FieldList $fieldList, FormBuilder $formBuilder)
 	{
 		$form = $formBuilder->create('App\Forms\FieldListForm', [
 			'method' => 'POST',
-			'route'  => ['field-list.self.store', $fieldList],
+			'route'  => ['field-list.store', $fieldList],
 		]);
 
 		$breadcrumb = $fieldList->showBreadcrumb();
 
-		return $this->create($form, $breadcrumb);
-	}
-
-	public function pluginCreate(FormBuilder $formBuilder, Plugin $plugin)
-	{
-		$form = $formBuilder->create('App\Forms\FieldListForm', [
-			'method' => 'POST',
-			'route'  => ['field-list.plugin.store', $plugin],
-		], [
-			'files' => $plugin->files()->where('type', File::TYPE_RENDERABLE)->get(),
-		]);
-
-		$breadcrumb = $plugin->showBreadcrumb();
-
-		return $this->create($form, $breadcrumb);
-	}
-
-	public function create($form, Breadcrumb $breadcrumb)
-	{
 		return view('generics.form', [
 			'title'       => 'Field list form',
 			'form'        => $form,
@@ -59,7 +46,8 @@ class FieldListController extends Controller
 			'route'  => ['field-list.update', $fieldList],
 			'model'  => $fieldList,
 		], [
-			'files' => $fieldList->owner->files()->where('type', File::TYPE_RENDERABLE)->get(),
+			// TODO: check if root is correct here
+			'files' => $fieldList->ancestors()->whereIsRoot()->first()->files()->where('type', File::TYPE_RENDERABLE)->get(),
 		]);
 
 		return view('generics.form', [
@@ -70,27 +58,15 @@ class FieldListController extends Controller
 		]);
 	}
 
-	public function pluginStore(Request $request, Plugin $plugin)
+	public function store(Request $request, FieldList $parent)
 	{
-		$route = route('plugin.show', $plugin);
+		$route = route('field-list.show', $parent);
 
-		return $this->store($request, $plugin, $route);
-	}
-
-	public function fieldListStore(Request $request, FieldList $fieldList)
-	{
-		$route = route('field-list.show', $fieldList);
-
-		return $this->store($request, $fieldList, $route);
-	}
-
-	public function store(Request $request, $owner, $route)
-	{
 		$fieldList = FieldList::make();
 
 		$fieldList->fill($request->all());
 
-		$fieldList->owner()->associate($owner);
+		$fieldList->parent()->associate($parent);
 
 		if ($request->has('file_id')) {
 			$fieldList->file()->associate(File::find($request->input('file_id')));

@@ -19,29 +19,19 @@ class ListController extends Controller
 		// Keeps flash messages from being consumed
 		session()->reflash();
 
-		return redirect($list->owner->routeShow());
+		if($list->isRoot()) {
+			return redirect($list->config->routeShow());
+		}
+
+		return redirect($list->parent->routeShow());
 	}
 
-	public function listCreate(List_ $list, FieldList $fieldList)
+	public function create(List_ $list, FieldList $fieldList)
 	{
-		$route = route('list.self.store', [$list, $fieldList]);
+		$route = route('list.store', [$list, $fieldList]);
 
 		$breadcrumb = $list->showBreadcrumb();
 
-		return $this->create($route, $list->getConfig(), $fieldList, $breadcrumb);
-	}
-
-	public function configCreate(Config $config, FieldList $fieldList)
-	{
-		$route = route('list.config.store', [$config, $fieldList]);
-
-		$breadcrumb = $config->showBreadcrumb();
-
-		return $this->create($route, $config, $fieldList, $breadcrumb);
-	}
-
-	public function create($route, $config, $fieldList, Breadcrumb $breadcrumb)
-	{
 		$formBuilder = app(FormBuilder::class);
 
 		$form = $formBuilder->create('App\Forms\ListForm', [
@@ -58,27 +48,12 @@ class ListController extends Controller
 			'title'       => 'List form',
 			'form'        => $form,
 			'submit_text' => 'Create new list',
-			'config'      => $config,
 			'fieldList'   => $fieldList,
 			'breadcrumb'  => $breadcrumb,
 		]);
 	}
 
-	public function listStore(Request $request, List_ $list, FieldList $fieldList)
-	{
-		$route = route('config.show', $list->getConfig());
-
-		return $this->store($request, $list, $fieldList, $route);
-	}
-
-	public function configStore(Request $request, Config $config, FieldList $fieldList)
-	{
-		$route = route('config.show', $config);
-
-		return $this->store($request, $config, $fieldList, $route);
-	}
-
-	public function store(Request $request, $owner, FieldList $fieldList, $route)
+	public function store(Request $request, List_ $l, FieldList $fieldList)
 	{
 		$fields = $fieldList->fields->pluck('key')->toArray();
 
@@ -86,7 +61,7 @@ class ListController extends Controller
 
 		$list->fill($request->all() + ['active' => 0]);
 
-		$list->owner()->associate($owner);
+		$list->parent()->associate($l);
 		$list->fieldList()->associate($fieldList);
 
 		$list->save();
@@ -101,12 +76,12 @@ class ListController extends Controller
 			$const->key = $field;
 			$const->active = true;
 			$const->value = $value;
-			$const->owner()->associate($list);
+			$const->list_()->associate($list);
 
 			$const->save();
 		}
 
-		return redirect($route);
+		return redirect($list->routeShow());
 	}
 
 	public function edit(FormBuilder $formBuilder, List_ $list)

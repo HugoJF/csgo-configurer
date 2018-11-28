@@ -18,12 +18,12 @@
 @endsection
 
 <!-- TODO: Find an easy way to find the field list -->
-@if(isset($config) && $config->owner_type == 'App\Plugin')
+@if(isset($config))
     @push('scripts')
         <script>
             $(function () {
                 $('#key').typeahead({
-                    ajax: '{{ route('plugin.fields', $config->owner) }}',
+                    ajax: '{{ route('plugin.fields') }}',
                     valueField: 'key',
                     displayField: 'display'
                 });
@@ -35,7 +35,6 @@
 @if(isset($config))
     @push('scripts')
         <script>
-
             $(function () {
                 $('#value').typeahead({
                     ajax: '{{ route('config.values', $config) }}',
@@ -50,7 +49,8 @@
                         }
 
                         // Query changed
-                        this.query = query.match(/{[a-zA-Z0-9.-_% ]*}?$/);
+                        // Match what is behind the cursor
+                        this.query = query.substring(0, this.$element.get(0).selectionStart).match(/{?[a-zA-Z0-9.-_% ]*}?$/);
 
                         // Check if match found something
                         if (this.query == null) {
@@ -111,9 +111,29 @@
                             var value = $selectedItem.attr('data-value');
                             var text = this.$menu.find('.active a').text();
 
+                            // Store original value since we are substringing it 2 times
+                            var originalValue = this.$element.val();
+                            
+                            // Store cursor since we use it multiple times
+                            var cursor = this.$element.get(0).selectionStart;
+                            
+                            // Debug
+                            console.log(`Cursor is at ${cursor}`);
+                            
+                            // Split value into before and after cursor
+                            var typed = originalValue.substring(0, cursor);
+                            var rest = originalValue.substring(cursor, originalValue.length);
+                            
+                            // Debug
+                            console.log(`Split value into (${typed}) and (${rest})`);
+                            
+                            // Replace the selected value into the before-cursor part
+                            typed = typed.replace(/{[a-zA-Z0-9.-_% ]*}?$/, value);
 
-                            value = this.$element.val().replace(/{[a-zA-Z0-9.-_% ]*}?$/, value);
-
+                            // Join them
+                            value = typed + rest;
+                            
+                            // Update element
                             this.$element
                                 .val(this.updater(value))
                                 .change();
@@ -124,6 +144,9 @@
                                     text: text
                                 });
                             }
+                            
+                            this.$element.get(0).selectionStart = typed.length;
+                            this.$element.get(0).selectionEnd = typed.length;
                         }
                         return this.hide();
                     },

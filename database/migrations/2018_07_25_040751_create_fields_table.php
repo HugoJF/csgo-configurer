@@ -23,8 +23,11 @@ class CreateFieldsTable extends Migration
 			$table->string('key');
 			$table->string('default')->nullable();
 
-			$table->unsignedInteger('owner_id');
-			$table->string('owner_type');
+			$table->unsignedInteger('field_list_id');
+			$table->foreign('field_list_id')->references('id')->on('field_lists');
+
+			$table->unsignedInteger('file_id')->nullable();
+			$table->foreign('file_id')->references('id')->on('files')->onDelete('set null');
 
 			$table->timestamps();
 		});

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Field;
 use App\FieldList;
+use App\File;
 use App\Plugin;
 use App\Server;
 use Illuminate\Http\Request;
@@ -11,32 +12,14 @@ use Kris\LaravelFormBuilder\FormBuilder;
 
 class FieldController extends Controller
 {
-	public function createPlugin(FormBuilder $formBuilder, Plugin $plugin)
+	public function create(FormBuilder $formBuilder, FieldList $fieldList)
 	{
 		$form = $formBuilder->create('App\Forms\FieldForm', [
 			'method' => 'POST',
-			'route'  => ['field.plugin.store', $plugin],
-		]);
-
-		$breadcrumb = $plugin->showBreadcrumb()->addCurrent('Creating new field');
-
-		return $this->create($form, $breadcrumb);
-	}
-
-	public function createFieldList(FormBuilder $formBuilder, FieldList $fieldList)
-	{
-		$form = $formBuilder->create('App\Forms\FieldForm', [
-			'method' => 'POST',
-			'route'  => ['field.field-list.store', $fieldList],
+			'route'  => ['field.store', $fieldList],
 		]);
 
 		$breadcrumbs = $fieldList->showBreadcrumb()->addCurrent('Creating new field');
-
-		return $this->create($form, $breadcrumbs);
-	}
-
-	public function create($form, $breadcrumbs)
-	{
 
 		return view('generics.form', [
 			'title'       => 'Field form',
@@ -46,27 +29,13 @@ class FieldController extends Controller
 		]);
 	}
 
-	public function storePlugin(Request $request, Plugin $plugin)
-	{
-		$this->store($request, $plugin);
-
-		return redirect()->route('plugin.show', $plugin);
-	}
-
-	public function storeFieldList(Request $request, FieldList $fieldList)
-	{
-		$this->store($request, $fieldList);
-
-		return redirect()->route('plugin.show', $fieldList->getPlugin());
-	}
-
-	public function store(Request $request, $owner)
+	public function store(Request $request, FieldList $fieldList)
 	{
 		$field = Field::make();
 
 		$field->fill($request->all() + ['required' => 0]);
 
-		$field->owner()->associate($owner);
+		$field->fieldList()->associate($fieldList);
 
 		$saved = $field->save();
 
@@ -75,6 +44,8 @@ class FieldController extends Controller
 		} else {
 			flash()->error('Field could not be created!');
 		}
+
+		return redirect($fieldList->routeShow());
 	}
 
 	public function edit(FormBuilder $formBuilder, Field $field)

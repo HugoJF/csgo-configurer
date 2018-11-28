@@ -30,8 +30,8 @@ class Constant extends Model
 		]);
 	}
 
-	public function owner()
+	public function list_()
 	{
-		return $this->morphTo();
+		return $this->belongsTo('App\List_', 'list_id');
 	}
 }

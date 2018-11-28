@@ -13,6 +13,7 @@ class FieldForm extends Form
 		$this->description();
 		$this->key();
 		$this->default();
+		$this->file_id();
 	}
 
 	private function name()
@@ -65,5 +66,32 @@ class FieldForm extends Form
 				'text' => 'Default value of this field when no constants with the same key as present in the rendering config',
 			],
 		]);
+	}
+
+	private function file_id()
+	{
+		$files = $this->getData('files');
+
+		if ($files) {
+			$files = $files->mapWithKeys(function ($value) {
+				return [$value->id => $value->path];
+			})->toArray();
+		} else {
+			$files = [];
+		}
+
+		if ($files) {
+			$this->add('file_id', 'select', [
+				'label'       => 'Owner file',
+				'choices'     => $files,
+				'attr'        => [
+					'data-live-search' => 'true',
+				],
+				'help_block'  => [
+					'text' => 'Which plugin file this field is stored. Used to group field by file.',
+				],
+				'empty_value' => '=== Select File ===',
+			]);
+		}
 	}
 }

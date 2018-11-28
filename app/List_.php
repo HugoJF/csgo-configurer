@@ -3,15 +3,17 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
 
 class List_ extends Model
 {
 	use RoutesActions;
+	use NodeTrait;
 
 	protected $table = 'lists';
 
 	protected $fillable = [
-		'key', 'overwrites', 'active',
+		'key', 'overwrites', 'active', 'name',
 	];
 
 	protected $routeNamePrefix = 'list.';
@@ -31,7 +33,6 @@ class List_ extends Model
 		]);
 	}
 
-
 	public function showBreadcrumb()
 	{
 		return List_::indexBreadcrumb($this->owner)->add([
@@ -40,14 +41,9 @@ class List_ extends Model
 		]);
 	}
 
-	public function owner()
+	public function config()
 	{
-		return $this->morphTo();
-	}
-
-	public function lists()
-	{
-		return $this->morphMany('App\List_', 'owner');
+		return $this->hasOne('App\Config', 'list_id');
 	}
 
 	public function fieldList()
@@ -57,20 +53,6 @@ class List_ extends Model
 
 	public function constants()
 	{
-		return $this->morphMany('App\Constant', 'owner');
-	}
-
-	public function getConfig()
-	{
-
-		$owner = $this->owner;
-		$owner_type = $this->owner_type;
-
-		while ($owner_type == 'App\List_') {
-			$owner_type = $owner->owner_type;
-			$owner = $owner->owner;
-		}
-
-		return $owner;
+		return $this->hasMany('App\Constant', 'list_id');
 	}
 }

@@ -59,6 +59,8 @@ class Server extends Model
 
 	public function getRenderableInstallationFiles()
 	{
+		if(!$this->installation) return [];
+
 		$plugins = $this->installation->plugins->pluck('id');
 
 		$files = File::whereIn('id', $plugins)->renderable()->get();
@@ -76,36 +78,41 @@ class Server extends Model
 		return $this->hasMany('App\Render');
 	}
 
+	public function syncs()
+	{
+		return $this->hasMany('App\Synchronization');
+	}
+
 	public function getPluginList()
 	{
-		$plugins = [];
-
 		if (!$this->installation) {
 			return [];
+		} else {
+			return $this->installation->plugins->toArray();
 		}
 
-		foreach ($this->installation->plugins as $plugin) {
-			$plugins[] = $plugin;
-		}
-
-		return $plugins;
 	}
 
 	public function getConfigs()
 	{
+		// Prepare array
 		$configs = [];
 
+		// Load relation
 		if ($this->installation) {
 			$this->installation->load(['plugins']);
 		}
 
+		// Load other configs
 		$user_configs = $this->user->configs()->get();
 		$server_configs = $this->configs()->get();
 
+		// Merge user configs
 		foreach ($user_configs as $config) {
 			$configs[] = $config;
 		}
 
+		// Merge installation configs
 		if ($this->installation) {
 			foreach ($this->installation->plugins as $plugin) {
 				if ($plugin->pivot->selection) {
@@ -114,10 +121,12 @@ class Server extends Model
 			}
 		}
 
+		// Merge server configs
 		foreach ($server_configs as $config) {
 			$configs[] = $config;
 		}
 
+		// Sort configs by priority
 		usort($configs, function ($b, $a) {
 			return $b->priority - $a->priority;
 		});
@@ -129,13 +138,12 @@ class Server extends Model
 	{
 		$configs = $this->getConfigs();
 
-
 		$finalConfig = [];
 		$constants = [];
 
 		foreach ($configs as $config) {
 			// Process constants
-			foreach ($config->constants as $constant) {
+			foreach ($config->data->constants as $constant) {
 				if ($constant->active) {
 					$finalConfig[ $constant->key ] = $constant->value;
 					$constants[] = $constant;
@@ -143,7 +151,7 @@ class Server extends Model
 			}
 
 			// Process lists
-			$finalConfig = $this->customMerge($finalConfig, $this->processLists($config->lists));
+			$finalConfig = $this->customMerge($finalConfig, $this->processLists($config->data->children));
 		}
 
 		$translator = new CompoundVariableTranslator($finalConfig);

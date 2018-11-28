@@ -73,7 +73,7 @@ class ServerRenderer implements ShouldQueue
 
 		$render->duration = $duration;
 		$render->logs = $this->logs;
-		$render->server()->associate($event->server);
+		$render->server()->associate($server);
 
 		$render->save();
 	}
@@ -108,10 +108,8 @@ class ServerRenderer implements ShouldQueue
 
 	private function eraseServerFiles(Server $server)
 	{
-		// TODO: delete as SQL
-		foreach ($server->files()->rendered()->get() as $file) {
-			$file->delete();
-		}
+		// TODO: Not tested
+		$server->files()->rendered()->delete();
 	}
 
 	private function renderFiles($server, $files)

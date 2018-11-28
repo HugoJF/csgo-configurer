@@ -23,6 +23,7 @@ class CompoundVariableTranslator
 
 	public function __construct(array &$config)
 	{
+		// Save reference to edit array directly
 		$this->config = &$config;
 	}
 
@@ -76,35 +77,65 @@ class CompoundVariableTranslator
 		}
 	}
 
+	/**
+	 * @param $base - base list for item
+	 * @param $key  - item key
+	 *
+	 * @throws \Exception
+	 */
 	public function translateItem(&$base, $key)
 	{
 		$this->resetLoopCheck();
 
-		if (!is_array($base[$key]) && $templateCount = $this->needsTranslation($base[$key], $matches)) {
-			$base[ $key ] = $this->replaceTemplates($base[$key], $templateCount, $matches);
-		} else if (is_array($base[$key])) {
-			$this->translateList($base[$key]);
+		$item = &$base[$key];
+
+		// Check if item is not a list and needs translation
+		if (!is_array($item) && ($templateCount = $this->needsTranslation($item, $matches))) {
+			// Replace item templates
+			$item = $this->replaceTemplates($item, $templateCount, $matches);
+		} else if (is_array($item)) {
+			// Pass to list translator
+			$this->translateList($item);
 		}
 	}
 
-	private function translateList(&$item)
+	/**
+	 * Translate a list of items
+	 *
+	 * @param $list - list of items that may need translation
+	 *
+	 * @throws \Exception
+	 */
+	private function translateList(&$list)
 	{
-		foreach ($item as $k => $i) {
-			$this->translateItem($item, $k);
+		foreach ($list as $k => $i) {
+			$this->translateItem($list, $k);
 		}
 	}
 
+	/**
+	 * @param $item
+	 * @param $templateCount
+	 * @param $matches
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
 	public function replaceTemplates($item, $templateCount, $matches)
 	{
-		$translation = $item;
-
 		for ($i = 0; $i < $templateCount; $i++) {
-			$translation = $this->replaceTemplate($translation, $matches[0][ $i ], $matches[1][ $i ]);
+			$item = $this->replaceTemplate($item, $matches[0][ $i ], $matches[1][ $i ]);
 		}
 
-		return $translation;
+		return $item;
 	}
 
+	/**
+	 * @param $value
+	 * @param $match
+	 *
+	 * @return false|int
+	 */
 	private function needsTranslation($value, &$match)
 	{
 		$count = preg_match_all('/{%\s*([a-zA-Z0-9.-_]+)\s*%}/', $value, $match);
@@ -112,6 +143,14 @@ class CompoundVariableTranslator
 		return $count;
 	}
 
+	/**
+	 * @param $original
+	 * @param $match
+	 * @param $variable
+	 *
+	 * @return mixed
+	 * @throws \Exception
+	 */
 	private function replaceTemplate($original, $match, $variable)
 	{
 		$variable = $this->getVariableByString($variable);
@@ -123,36 +162,64 @@ class CompoundVariableTranslator
 		}
 	}
 
+	/**
+	 * @param $path - variable path as keys separated by dots.
+	 *
+	 * @return array|bool|mixed|string
+	 * @throws \Exception
+	 */
 	private function getVariableByString($path)
 	{
 		$this->loopCheck($path);
 
+		// Get every key in path
 		$pieces = explode('.', $path);
+
+		// Start at root
 		$value = $this->config;
+
+		// Expose scope of variable
 		$k = null;
+
+		// Traverse array
 		foreach ($pieces as $key => $piece) {
 			$k = $key;
+
+			// Move root pointer if path is correct
 			if (array_key_exists($piece, $value)) {
 				$value = $value[ $piece ];
 			} else {
-				switch ($this->mode) {
-					default:
-					case static::MODE_EXCEPTION:
-						throw new \Exception("Bad path '{$path}' on part '{$piece}'");
-						break;
-					case static::MODE_REPLACE_EMPTY:
-						return '';
-						break;
-					case static::MODE_NO_REPLACE:
-						return false;
-						break;
-				}
+				return $this->runMode($piece, $path);
 			}
 		}
-		if ($this->needsTranslation($value, $matches)) {
-			$this->translateItem($k, $value);
+
+		// If resulting variable needs translation, translate it
+		if (( $templateCount = $this->needsTranslation($value, $matches))) {
+			$value = $this->replaceTemplates($value, $templateCount, $matches);
 		}
 
 		return $value;
+	}
+
+	/**
+	 * @param $piece
+	 * @param $path
+	 *
+	 * @return bool|string
+	 * @throws \Exception
+	 */
+	protected function runMode($piece, $path) {
+		switch ($this->mode) {
+			default:
+			case static::MODE_EXCEPTION:
+				throw new \Exception("Bad path '{$path}' on part '{$piece}'");
+				break;
+			case static::MODE_REPLACE_EMPTY:
+				return '';
+				break;
+			case static::MODE_NO_REPLACE:
+				return false;
+				break;
+		}
 	}
 }

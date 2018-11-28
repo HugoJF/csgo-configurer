@@ -3,10 +3,12 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Kalnoy\Nestedset\NodeTrait;
 
 class FieldList extends Model
 {
 	use RoutesActions;
+	use NodeTrait;
 
 	protected $routeNamePrefix = 'field-list.';
 
@@ -18,22 +20,29 @@ class FieldList extends Model
 		'plugin_id',
 	];
 
-	public static function indexBreadcrumb($owner) {
-
+	public static function indexBreadcrumb($owner)
+	{
 		return $owner->showBreadcrumb()->addUrl('Field lists', $owner->routeShow());
 	}
 
 	public function showBreadcrumb()
 	{
-		return FieldList::indexBreadcrumb($this->owner)->add([
-			'text'  => $this->name,
-			'route' => ['field-list.show', $this],
-		]);
+		if ($this->isRoot()) {
+			return FieldList::indexBreadcrumb($this->plugin)->add([
+				'text'  => $this->name,
+				'route' => ['field-list.show', $this],
+			]);
+		} else {
+			return $this->parent->showBreadcrumb()->add([
+				'text'  => $this->name,
+				'route' => ['field-list.show', $this],
+			]);
+		}
 	}
 
-	public function owner()
+	public function plugin()
 	{
-		return $this->morphTo();
+		return $this->hasOne('App\Plugin', 'field_list_id');
 	}
 
 	public function lists()
@@ -43,29 +52,16 @@ class FieldList extends Model
 
 	public function fields()
 	{
-		return $this->morphMany('App\Field', 'owner');
+		return $this->hasMany('App\Field');
 	}
 
-	public function file()
+	public function files()
 	{
 		return $this->belongsTo('App\File');
 	}
 
-	public function fieldLists()
-	{
-		return $this->morphMany('App\FieldList', 'owner');
-	}
-
 	public function getPlugin()
 	{
-		$owner = $this->owner;
-		$owner_type = $this->owner_type;
-
-		while ($owner_type == 'App\FieldList') {
-			$owner_type = $owner->owner_type;
-			$owner = $owner->owner;
-		}
-
-		return $owner;
+		// TODO: implement
 	}
 }

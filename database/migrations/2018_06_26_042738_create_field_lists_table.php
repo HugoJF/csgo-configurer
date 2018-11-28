@@ -17,14 +17,13 @@ class CreateFieldListsTable extends Migration
             $table->increments('id');
 
             $table->string('name');
-            $table->string('key');
+            $table->string('key')->nullable();
             $table->string('description')->nullable();
-
-            $table->unsignedInteger('owner_id');
-            $table->string('owner_type');
 
             $table->unsignedInteger('file_id')->nullable();
             $table->foreign('file_id')->references('id')->on('files')->onDelete('set null');
+
+			$table->nestedSet();
 
 			$table->timestamps();
         });

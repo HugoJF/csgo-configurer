@@ -53,6 +53,9 @@ Route::prefix('servers')->name('server.')->group(function () {
 	Route::get('{server}/render-config', 'ServerController@renderConfig')->name('render-config');
 	Route::get('{server}/preview-file/{file}', 'ServerController@previewFile')->name('preview-file');
 
+	Route::get('render-all', 'ServerController@renderAll')->name('render-all');
+	Route::get('sync-all', 'ServerController@syncAll')->name('sync-all');
+
 	Route::post('/', 'ServerController@store')->name('store');
 
 	Route::patch('{server}', 'ServerController@update')->name('update');
@@ -65,21 +68,13 @@ Route::prefix('renders')->name('render.')->group(function () {
 });
 
 Route::prefix('constant')->name('constant.')->group(function () {
-	Route::name('config.')->group(function () {
-		Route::get('config/{config}/constant/create/{field_list?}', 'ConstantController@configCreate')->name('create');
-
-		Route::post('config/{config}/constant', 'ConstantController@configStore')->name('store');
-	});
-
-	Route::name('list.')->group(function () {
-		Route::get('list/{list}/constant/create/{field_list?}', 'ConstantController@listCreate')->name('create');
-
-		Route::post('list/{list}/constant', 'ConstantController@listStore')->name('store');
-	});
-
 	Route::get('{constant}/activate', 'ConstantController@activate')->name('activate');
 	Route::get('{constant}/deactivate', 'ConstantController@deactivate')->name('deactivate');
+
 	Route::get('{constant}/edit', 'ConstantController@edit')->name('edit');
+	Route::get('{list}/create/{field_list?}', 'ConstantController@create')->name('create');
+
+	Route::post('{list}', 'ConstantController@store')->name('store');
 
 	Route::patch('{constant}', 'ConstantController@update')->name('update');
 
@@ -87,17 +82,9 @@ Route::prefix('constant')->name('constant.')->group(function () {
 });
 
 Route::prefix('list')->name('list.')->group(function () {
-	Route::name('config.')->group(function () {
-		Route::get('config/{config}/create/{field_list}', 'ListController@configCreate')->name('create');
+	Route::get('{list}/create/{field_list}', 'ListController@create')->name('create');
 
-		Route::post('config/{config}/field-list/{field_list}', 'ListController@configStore')->name('store');
-	});
-
-	Route::name('self.')->group(function () {
-		Route::get('{list}/list/create/{field_list}', 'ListController@listCreate')->name('create');
-
-		Route::post('{list}/field-list/{field_list}', 'ListController@listStore')->name('store');
-	});
+	Route::post('{list}/field-list/{field_list}', 'ListController@store')->name('store');
 
 	Route::get('{list}/activate', 'ListController@activate')->name('activate');
 	Route::get('{list}/deactivate', 'ListController@deactivate')->name('deactivate');
@@ -123,15 +110,8 @@ Route::prefix('config')->name('config.')->group(function () {
 });
 
 Route::prefix('field-list')->name('field-list.')->group(function () {
-	Route::name('plugin.')->group(function () {
-		Route::get('create/plugin/{plugin}', 'FieldListController@pluginCreate')->name('create');
-		Route::post('plugin/{plugin}', 'FieldListController@pluginStore')->name('store');
-	});
-
-	Route::name('self.')->group(function () {
-		Route::get('create/{field_list}', 'FieldListcontroller@fieldListCreate')->name('create');
-		Route::post('{field_list}', 'FieldListController@fieldListStore')->name('store');
-	});
+	Route::get('create/{field_list}', 'FieldListcontroller@create')->name('create');
+	Route::post('{field_list}', 'FieldListController@store')->name('store');
 
 	Route::get('{field_list}', 'FieldListController@show')->name('show');
 
@@ -143,17 +123,9 @@ Route::prefix('field-list')->name('field-list.')->group(function () {
 });
 
 Route::prefix('field')->name('field.')->group(function () {
-	Route::name('field-list.')->group(function () {
-		Route::get('create/field-list/{field_list}', 'FieldController@createFieldList')->name('create');
+	Route::get('create/{field_list}', 'FieldController@create')->name('create');
 
-		Route::post('field-list/{field_list}', 'FieldController@storeFieldList')->name('store');
-	});
-
-	Route::name('plugin.')->group(function () {
-		Route::get('create/plugin/{plugin}', 'FieldController@createPlugin')->name('create');
-
-		Route::post('plugin/{plugin}', 'FieldController@storePlugin')->name('store');
-	});
+	Route::post('{field_list}', 'FieldController@store')->name('store');
 
 	Route::get('{field}/require', 'FieldController@require')->name('require');
 	Route::get('{field}/optional', 'FieldController@optional')->name('optional');
@@ -188,37 +160,27 @@ Route::name('file.')->group(function () {
 	Route::patch('{file}/make-static', 'FileController@makeStatic')->name('make-static');
 });
 
-Route::get('plugins/{plugin}/fields', function (\App\Plugin $plugin) {
-	$parser = new \App\Classes\PluginFieldParser($plugin);
+Route::get('constants/typeahead/key', function () {
+	$parser = new \App\Classes\ConstantKeyTypeahead();
 
 	return $parser->parse()->result();
 })->name('plugin.fields');
 
-Route::get('config/{config}/values', function (\App\Config $config) {
-	$parser = new \App\Classes\ConfigValueParser($config);
+
+// Pack every server config
+Route::get('constants/typeahead/value', function () {
+	$parser = new \App\Classes\ConstantValueTypeahead();
 
 	return $parser->parse()->result();
 })->name('config.values');
 
+
+/**
+ * Plugin config manifest
+ */
 Route::get('plugins/{plugin}/manifest', function (\App\Plugin $plugin) {
 	$plugin->load('fields', 'fieldLists', 'fieldLists.fields');
 
 	return $plugin;
 })->name('plugin.manifest');
 
-
-Route::get('smartlog', function () {
-	$log = new \App\Classes\SmartLog();
-
-	$log->addMeasure('Hey');
-	sleep(0.5);
-	$log->addMeasure('Bye');
-
-	$serialized = json_encode($log);
-
-	$log2 = new \App\Classes\SmartLog();
-	$log2->jsonDeserialize($serialized);
-
-
-	return $log2->render();
-});

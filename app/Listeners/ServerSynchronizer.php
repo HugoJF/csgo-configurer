@@ -7,6 +7,7 @@ use App\Events\GenericBroadcastEvent;
 use App\Events\ServerSynchronizationRequest;
 use App\File;
 use App\Server;
+use App\Synchronization;
 use Carbon\Carbon;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Queue\InteractsWithQueue;
@@ -21,8 +22,7 @@ class ServerSynchronizer implements ShouldQueue
 	/** @var FilesystemAdapter */
 	private $destination_server;
 
-	private $forced;
-	private $log;
+	private $logs;
 	/**
 	 * Create the event listener.
 	 *
@@ -30,7 +30,7 @@ class ServerSynchronizer implements ShouldQueue
 	 */
 	public function __construct()
 	{
-		$forced = false;
+		$this->logs = new SmartLog();
 	}
 
 	/**
@@ -42,26 +42,45 @@ class ServerSynchronizer implements ShouldQueue
 	 */
 	public function handle(ServerSynchronizationRequest $event)
 	{
+		$startTime = round(microtime(true) * 1000);
+
 		event(new GenericBroadcastEvent('Server synchronization started!', "Server <code>{$event->server->name}</code> synchronization started!"));
 
 		$server = $event->server;
 
+		$this->logs->addMeasure('Creating FTP connection to server');
 		$this->createFtpConnection($server);
 
+		$this->logs->addMeasure('Preparing file list');
 		$files = $this->prepareFileList($server);
 
+		$this->logs->addMeasure('Preparing deletion list');
 		$deletionList = $this->prepareDeletionList($server, $files);
 
+		$this->logs->addMeasure('Deleting files');
 		$this->deleteFiles($deletionList);
 
+		$this->logs->addMeasure('Restoring backup files');
 		$this->restoreBackupFiles($server, $deletionList);
 
+		$this->logs->addMeasure('Wiping sync files');
 		$this->wipeSyncFiles($server);
 
+		$this->logs->addMeasure('Syncing files');
 		$this->syncFiles($server, $files);
 
+		$this->logs->addMeasure('Finishing synchronization');
 		$event->server->synced_at = Carbon::now();
 		$event->server->save();
+
+		$endTime = round(microtime(true) * 1000);
+		$duration = $endTime - $startTime;
+
+		$sync = Synchronization::make();
+
+		$sync->duration = $duration;
+		$sync->log = $this->logs;
+		$sync->server()->associate($event->server);
 
 		event(new GenericBroadcastEvent('Server synchronization finished!', "Server <code>{$event->server->name}</code> synchronization finished successfully!"));
 	}

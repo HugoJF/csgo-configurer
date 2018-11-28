@@ -1,4 +1,10 @@
 @forelse($lists as $key => $list)
+    @php
+        if(!$list->relationLoaded('fieldList')) {
+            dd($list->toArray());
+            throw new Exception('NOT loaded exception');
+        }
+    @endphp
     <div class="well">
         <div class="page-header">
             <h2>{{ $prefix ?? '' }}{{ $list->fieldList->name }}
@@ -24,17 +30,17 @@
         {!! Form::close() !!}
         
         <h3>Constants</h3>
-        <a class="btn btn-sm btn-default" href="{{ route('constant.list.create', $list) }}">
+        <a class="btn btn-sm btn-default" href="{{ route('constant.create', $list) }}">
             <span class="glyphicon glyphicon-plus-sign"></span> Add constant
         </a>
         <p></p>
         @include('constant.table_with_missing', ['constants' => $list->constants, 'fieldList' => $list->fieldList, 'owner' => $list])
         
-        @if($list->fieldList->fieldLists()->count() > 0)
+        @if($list->fieldList->children->count() > 0)
             <h3>Sub field-lists</h3>
-            @include('field_list.add_list_table', ['fieldLists' => $list->fieldList->fieldLists, 'owner' => $list])
+            @include('field_list.add_list_table', ['fieldLists' => $list->fieldList->children->toTree(), 'owner' => $list])
             <h3>Lists</h3>
-            @include('list.table', ['lists' => $list->lists, 'prefix' => ($prefix ?? '' ) . $list->fieldList->name . ' 🠢 '])
+            @include('list.table', ['lists' => $list->children, 'prefix' => ($prefix ?? '' ) . $list->fieldList->name . ' 🠢 '])
         @endif
     </div>
 

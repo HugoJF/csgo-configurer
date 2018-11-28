@@ -11,31 +11,37 @@ namespace App\Classes;
 
 use App\Field;
 use App\FieldList;
+use App\Installation;
 use App\Plugin;
+use App\Server;
+use App\User;
 use Illuminate\Support\Collection;
 
-class PluginFieldParser
+class ConstantKeyTypeahead
 {
-	private $plugin;
-
 	private $result;
 
-	public function __construct(Plugin $plugin)
+	public function __construct()
 	{
-		$this->plugin = $plugin;
 	}
 
 	public function parse()
 	{
-		$this->parsePlugin($this->plugin);
+		foreach (Plugin::all() as $plugin) {
+			$this->parsePlugin($plugin);
+		}
 
 		return $this;
 	}
 
 	public function parsePlugin(Plugin $plugin)
 	{
-		$this->parseFields($plugin->fields);
-		$this->parseFieldLists($plugin->fieldLists);
+		if ($plugin->data && $plugin->data->fields) {
+			$this->parseFields($plugin->data->fields);
+		}
+		if ($plugin->data && $plugin->data->fieldLists) {
+			$this->parseFieldLists($plugin->data->fieldLists);
+		}
 	}
 
 	public function parseFields(Collection $fields)

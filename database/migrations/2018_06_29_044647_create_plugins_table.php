@@ -23,6 +23,9 @@ class CreatePluginsTable extends Migration
 
             $table->string('folder');
 
+            $table->unsignedInteger('field_list_id');
+            $table->foreign('field_list_id')->references('id')->on('field_lists');
+
             $table->timestamp('modified_at');
 
             $table->timestamps();

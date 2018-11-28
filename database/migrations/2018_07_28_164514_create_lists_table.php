@@ -16,7 +16,10 @@ class CreateListsTable extends Migration
 		Schema::create('lists', function (Blueprint $table) {
 			$table->increments('id');
 
-			$table->boolean('active');
+			$table->string('name');
+			$table->string('description')->nullable();
+
+			$table->boolean('active')->default(true);
 
 			$table->string('key')->nullable();
 			$table->boolean('overwrites')->default(false);
@@ -24,8 +27,7 @@ class CreateListsTable extends Migration
 			$table->unsignedInteger('field_list_id')->nullable();
 			$table->foreign('field_list_id')->references('id')->on('field_lists')->onDelete('set null');
 
-			$table->unsignedInteger('owner_id');
-			$table->string('owner_type');
+			$table->nestedSet();
 
 			$table->timestamps();
 		});
